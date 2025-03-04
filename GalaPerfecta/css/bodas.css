@@ -1,0 +1,174 @@
+.parent {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: 30px auto 1fr 1fr 1fr auto auto; 
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+
+   
+}
+
+.div1 {
+    grid-area: 1 / 1 / 2 / 13;
+    background-color:  #ddc3a7;
+    height: 30px;
+}
+
+.presentacion{
+    text-align: center;
+    font-family: 'Arial Narrow';
+   color: white;
+}
+
+.div2 {
+    grid-area: 2 / 1 / 3 / 13;
+    width: 100%;    
+    padding: 10px 10px;
+    display: flex;
+    gap: 300px;
+}
+
+.div3 {
+    grid-area: 3 / 1 / 6 / 13;
+    background-color: #18213b;
+}
+
+.div4 {/*esta es de referencias*/
+    display: flex;
+    grid-area: 12 / 1 / 13 / 13;
+    background-color: #18213b;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+}
+
+.div5 {
+    display: flex;
+    grid-area: 6 / 1 / 8 / 13;
+    padding: 50px;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.div6 {
+    grid-area: 8 / 1 / 12 / 7;
+    padding: 30px;
+    background-color: #ddc3a7;
+}
+
+.div7 {
+    grid-area: 8 / 7 / 12 / 13;
+    padding: 30px;
+    background-color: #ddc3a7;
+}
+
+p {
+    font-family: 'Georgia';
+    text-align: justify;
+    line-height: 1.4;
+    /* Mejora la legibilidad (Este es el interlineado) */
+    font-size: 16px;
+    height: auto;
+    margin: 2px 0;
+    color: white;
+}
+
+img:not(.logo,.galeria){
+    height: 450px;
+    filter: brightness(40%); /* Reduce el brillo al 50% */
+}
+
+.gallery-container {
+    position: relative;
+    text-align: center;
+    margin: 0 auto;
+    width: 100%; /* Ajusta el ancho según necesites */
+  }
+
+.galeria{
+    height: 200px;
+    width: 200px;
+    margin: 5px;
+    border-radius: 50px;
+}
+
+.logo{
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+}
+
+h1 {
+    font-family: Georgia;
+    text-align: left;
+}
+
+h2{
+    font-family: 'Georgia';
+    text-align: center;
+    color: white;
+}
+
+h3{
+    font-family: 'Georgia';
+    text-align: center;
+}
+
+a{
+    color: black;
+    text-decoration: none;
+    font-family: 'Georgia';
+}
+
+.btn-group {
+    background-color: #ddc3a7;
+    display: flex;
+}
+
+.btn-personalizado {
+    font-family: 'Georgia';
+    display: flex;
+    padding: 10px 10px;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    width: 0;
+    height: 65px;
+}
+
+
+nav {
+    background-color: #ddc3a7;
+    padding: 10px;
+}
+
+.navbar-nav {
+    margin-left: auto; /* Empuja los botones hacia la derecha */
+    margin-right: 20px; /* Agrega espacio al lado derecho */
+    display: flex; 
+    gap: 10px; /* Espaciado entre botones */
+    border-radius: 50px;
+}
+
+.navbar-nav .nav-item {
+    color: black;
+    border-radius: 50px; 
+    border: none;
+    outline: none;
+    transition: background-color 0.3s ease;
+}
+
+.navbar-nav .nav-link {
+    color: black;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    background-color: transparent;
+    transition: background-color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: #18213b;
+    color: white;
+}

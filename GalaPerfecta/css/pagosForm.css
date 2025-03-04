@@ -1,0 +1,105 @@
+/* bodas.css */
+
+/* Configuración general */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #000; /* Morado */
+    margin: 20px 0;
+}
+
+form {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+input:focus, select:focus, button:focus {
+    outline: none;
+    border-color: #000; /* Morado */
+    box-shadow: 0 0 5px black;
+}
+
+button {
+    background-color: #ddc3a7;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #ddc3a7;
+}
+
+p {
+    margin: 10px 0;
+}
+
+/* Mensajes */
+p strong {
+    font-weight: bold;
+}
+
+p[style="color: green;"] {
+    color: #28a745;
+    font-weight: bold;
+}
+
+p[style="color: red;"] {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Tablas y secciones dinámicas */
+#monto_total, #monto_plazo {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+#plazos_detalles {
+    background-color: #f7f7f7;
+    padding: 15px;
+    border: 1px dashed #ddd;
+    border-radius: 4px;
+}
+
+/* Para centrar botones opcionales */
+button[onclick] {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+button[onclick]:hover {
+    background-color: #e6e6e6;
+    color: #000;
+}

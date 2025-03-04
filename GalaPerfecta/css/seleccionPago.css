@@ -1,0 +1,72 @@
+/* Archivo: styles.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f9;
+}
+
+.container {
+    text-align: center;
+    background: #ffffff;
+    padding: 20px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Estilo para el botón de Pago al Contado */
+.pago-contado {
+    background-color: #28a745;
+    color: white;
+}
+
+.pago-contado:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+/* Estilo para el botón de Pago a Plazos */
+.pago-plazos {
+    background-color: #007bff;
+    color: white;
+}
+
+.pago-plazos:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+.regresar {
+    background-color: #ff1e00;
+    color: white;
+}
+
+.regresar:hover {
+    background-color: #ff1e00;
+    transform: scale(1.05);
+}

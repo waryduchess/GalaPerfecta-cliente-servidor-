@@ -1,0 +1,210 @@
+body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background-image: url("../img/eventoslogin.png"); /* Fondo general */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+nav {
+    background-color: #ddc3a7;
+    padding: 20px 10px;
+    margin-bottom: 40px;
+    box-sizing: border-box;
+}
+
+.container,
+.container-paquete {
+    margin-top: 40px;
+    display: flex;
+    width: 900px;
+    height: 1070px;
+    min-height: 700px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Sección de bienvenida */
+.welcome-section {
+    flex: 1;
+    background: #18213b; /* Fondo oscuro */
+    color: #fff; /* Texto blanco para contraste */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.welcome-section h1 {
+    font-size: 28px;
+    margin: 0;
+    color: #ddc3a7; /* Texto en tono cálido */
+}
+
+.welcome-section p {
+    font-size: 16px;
+    opacity: 0.8;
+}
+
+/* Contenedor de formularios */
+.form-container {
+    flex: 2;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+}
+
+.form-container-paq {
+    flex: 2;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    
+}
+/* Formularios */
+.form {
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+    position: absolute;
+    top: 60%; /* Ajusta el centrado */
+    transform: translateY(-60%);
+    transition: transform 0.5s ease-in-out;
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+.login-form {
+    right: 0;
+    transform: translate(100%, -50%);
+}
+
+.register-form {
+    left: 0;
+    transform: translate(-100%, -50%);
+}
+.paquete-form {
+    
+    left: 0;
+    transform: translate(100%, -50%);
+    align-items: center;
+}
+
+.form.active {
+    transform: translate(0, -50%);
+}
+
+/* Cajas de entrada */
+.input-box {
+    width: 100%;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.input-box input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    outline: none;
+}
+
+.input-box input:focus {
+    border-color: #128c7e; /* Verde en el enfoque */
+}
+
+.input-box label {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 14px;
+    pointer-events: none;
+    transition: 0.3s;
+}
+
+.input-box input:focus + label,
+.input-box input:not(:placeholder-shown) + label {
+    top: -10px;
+    font-size: 12px;
+    color: #18213b; /* Texto en color oscuro */
+}
+
+/* Botón */
+.btn {
+    width: 100%;
+    padding: 10px;
+    background: #128c7e; /* Verde como color principal */
+    color: #fff; /* Texto blanco para contraste */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background: #18213b; /* Verde más oscuro al pasar el cursor */
+    color: #ddc3a7;
+}
+
+.btn-secondary {
+    margin-top: 20px; /* Espacio arriba del botón de regresar */
+}
+
+
+/* codigo para logo */
+
+.logo{
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+}
+
+a{
+    color: black;
+    /*text-decoration: none;*/
+}
+
+.logo{
+    text-decoration: none;
+}
+
+h1 {
+    font-family: Georgia;
+    text-align: left;
+}
+
+/* General para el contenedor */
+.input-box-check {
+    margin-top: 15px;
+}
+
+/* Estilo para el grupo de checkboxes */
+.checkbox-group {
+    display: flex;
+    flex-direction: column; /* Alinea los elementos en columna */
+    gap: 10px; /* Espacio entre cada checkbox */
+    margin-top: 10px;
+}
+
+/* Estilo para cada checkbox y etiqueta */
+.checkbox-group label {
+    display: flex;
+    align-items: center; /* Alinea el texto con el checkbox */
+    font-size: 16px;
+    color: #000; /* Cambia el color del texto a negro */
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin-right: 10px; /* Espacio entre el checkbox y el texto */
+}
+

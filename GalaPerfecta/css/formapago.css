@@ -1,0 +1,94 @@
+body {
+  background-color: #e8e8e8; /* Ajuste para que coincida con el fondo de tu diseño */
+}
+
+.payment-options {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
+}
+
+.payment-options button {
+  width: 120px;
+  height: 50px; /* Ajustado para ser más compacto como en tu imagen */
+  background: #ffffff;
+  border: none; /* Sin bordes */
+  border-radius: 30px; /* Bordes más redondeados */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.payment-options button:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.payment-options img {
+  width: 40%; /* Ajuste proporcional para los íconos */
+  height: auto;
+}
+
+.logo {
+  width: 60%;
+  height: auto;
+}
+
+.separator .line {
+  border: none;
+  height: 1px;
+  background: #cccccc;
+  margin: 0 20px;
+}
+
+.separator .line {
+  border: 0;
+  height: 1px;
+  background: #dee2e6;
+}
+
+.separator .pagoC {
+  font-size: 14px;
+  color: #666666;
+  margin: 10px 0;
+}
+
+.credit-card-info {
+  margin: 0 auto;
+  max-width: 400px; /* Más angosto */
+  padding: 20px; /* Ajustar padding */
+  background: #ffffff;
+  border-radius: 10px; /* Más redondeado */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+.input_label {
+  font-size: 14px;
+  color: #495057;
+  font-weight: bold;
+}
+
+.input_container .form-control {
+  border: 1px solid #cccccc;
+  border-radius: 10px; /* Más redondeado */
+  padding: 12px;
+  font-size: 14px;
+}
+
+.split .form-control {
+  flex: 1;
+}
+
+button.btn-primary, button.btn-secondary {
+  width: 120px; /* Tamaño más proporcional */
+  padding: 10px;
+  border-radius: 30px; /* Bordes redondeados */
+  font-size: 14px;
+}
+
+button:hover {
+  opacity: 0.9;
+}
