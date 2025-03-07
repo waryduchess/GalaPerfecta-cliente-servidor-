@@ -30,9 +30,6 @@ const swaggerOptions = {
 //
 const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 
-const swaggerSpec = swaggerJSDoc(options);
-
-module.exports = swaggerSpec;
 
 // Swagger UI
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
