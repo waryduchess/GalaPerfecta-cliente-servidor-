@@ -1,6 +1,7 @@
 const express = require("express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const swaggerJSDoc = require('swagger-jsdoc');
 //aqui pueden revisar la documentacion de la api
 //http://localhost:3000/api-docs/
 const app = express();
