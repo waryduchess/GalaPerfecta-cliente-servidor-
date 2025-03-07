@@ -32,7 +32,7 @@ const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 
 // Swagger UI
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-
+//Agregar swagger normal sin Ui
 // Cargar rutas (elimina las definiciones duplicadas de abajo)
 app.use(require("./routes/usuarios"));
 app.use(require("./routes/servicios"));
