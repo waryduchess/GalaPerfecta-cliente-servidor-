@@ -237,4 +237,4 @@ router.delete('/usuarios/:id', (req, res) => {
  */
 
 module.exports = router;
-//
+//continuara......
