@@ -37,6 +37,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 app.use(require("./routes/usuarios"));
 app.use(require("./routes/servicios"));
 app.use(require("./routes/eventos"));
+app.use(require("./routes/jsonwt"));
 
 // Iniciar servidor
 app.listen(PORT, () => {
