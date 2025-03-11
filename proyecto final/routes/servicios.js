@@ -1,6 +1,31 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken'); // Importación necesaria
 const {connection} = require("../config/config.db");
+const SECRET_KEY = 'EsperemosQueEstaClaveSiFuncionePlease2013460';
+
+/**
+ * Middleware para verificar el token JWT
+ */
+const verificarToken = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ 
+            mensaje: 'Token no proporcionado' 
+        });
+    }
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        req.usuario = decoded;
+        next();
+    } catch (error) {
+        return res.status(401).json({ 
+            mensaje: 'Token inválido' 
+        });
+    }
+};
 
 /**
  * @swagger
@@ -15,6 +40,8 @@ const {connection} = require("../config/config.db");
  *   get:
  *     summary: Obtener todos los servicios
  *     tags: [Servicios]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de servicios
@@ -24,8 +51,10 @@ const {connection} = require("../config/config.db");
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Servicio'
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  */
-router.get('/servicios', (req, res) => {
+router.get('/servicios', verificarToken, (req, res) => {
     connection.query('SELECT * FROM servicios', (err, results) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -41,6 +70,8 @@ router.get('/servicios', (req, res) => {
  *   get:
  *     summary: Obtener un servicio por ID
  *     tags: [Servicios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -55,10 +86,12 @@ router.get('/servicios', (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Servicio'
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       404:
  *         description: Servicio no encontrado
  */
-router.get('/servicios/:id', (req, res) => {
+router.get('/servicios/:id', verificarToken, (req, res) => {
     const { id } = req.params;
     connection.query('SELECT * FROM servicios WHERE id_servicio = ?', [id], (err, results) => {
         if (err) {
@@ -77,6 +110,8 @@ router.get('/servicios/:id', (req, res) => {
  *   post:
  *     summary: Agregar un nuevo servicio
  *     tags: [Servicios]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -97,10 +132,12 @@ router.get('/servicios/:id', (req, res) => {
  *                   type: integer
  *       400:
  *         description: Campos obligatorios faltantes
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       500:
  *         description: Error del servidor
  */
-router.post('/servicios', (req, res) => {
+router.post('/servicios', verificarToken, (req, res) => {
     const { descripcion, nombre_servicio, precio_servicio } = req.body;
     
     if (!descripcion || !nombre_servicio || !precio_servicio) {
@@ -125,6 +162,8 @@ router.post('/servicios', (req, res) => {
  *   put:
  *     summary: Editar un servicio por ID
  *     tags: [Servicios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -141,12 +180,14 @@ router.post('/servicios', (req, res) => {
  *     responses:
  *       200:
  *         description: Servicio actualizado correctamente
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       404:
  *         description: Servicio no encontrado
  *       500:
  *         description: Error del servidor
  */
-router.put('/servicios/:id', (req, res) => {
+router.put('/servicios/:id', verificarToken, (req, res) => {
     const { id } = req.params;
     const { descripcion, nombre_servicio, precio_servicio } = req.body;
     connection.query(
@@ -170,6 +211,8 @@ router.put('/servicios/:id', (req, res) => {
  *   delete:
  *     summary: Eliminar un servicio por ID
  *     tags: [Servicios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -180,12 +223,14 @@ router.put('/servicios/:id', (req, res) => {
  *     responses:
  *       200:
  *         description: Servicio eliminado correctamente
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       404:
  *         description: Servicio no encontrado
  *       500:
  *         description: Error del servidor
  */
-router.delete('/servicios/:id', (req, res) => {
+router.delete('/servicios/:id', verificarToken, (req, res) => {
     const { id } = req.params;
     connection.query('DELETE FROM servicios WHERE id_servicio = ?', [id], (err, results) => {
         if (err) {
@@ -201,6 +246,11 @@ router.delete('/servicios/:id', (req, res) => {
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  *   schemas:
  *     Servicio:
  *       type: object
@@ -226,4 +276,3 @@ router.delete('/servicios/:id', (req, res) => {
  */
 
 module.exports = router;
-//

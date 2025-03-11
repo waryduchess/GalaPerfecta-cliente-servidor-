@@ -1,6 +1,31 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken'); // Importación necesaria
 const { connection } = require("../config/config.db");
+const SECRET_KEY = 'EsperemosQueEstaClaveSiFuncionePlease2013460';
+
+/**
+ * Middleware para verificar el token JWT
+ */
+const verificarToken = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ 
+            mensaje: 'Token no proporcionado' 
+        });
+    }
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        req.usuario = decoded;
+        next();
+    } catch (error) {
+        return res.status(401).json({ 
+            mensaje: 'Token inválido' 
+        });
+    }
+};
 
 /**
  * @swagger
@@ -12,6 +37,11 @@ const { connection } = require("../config/config.db");
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  *   schemas:
  *     Evento:
  *       type: object
@@ -33,6 +63,8 @@ const { connection } = require("../config/config.db");
  *   get:
  *     summary: Obtener todos los eventos
  *     tags: [Eventos]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de eventos
@@ -42,8 +74,10 @@ const { connection } = require("../config/config.db");
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Evento'
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  */
-router.get('/eventos', (req, res) => {
+router.get('/eventos', verificarToken, (req, res) => {
     connection.query('SELECT * FROM eventos', (err, results) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -59,6 +93,8 @@ router.get('/eventos', (req, res) => {
  *   get:
  *     summary: Obtener un evento por ID
  *     tags: [Eventos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -73,10 +109,12 @@ router.get('/eventos', (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Evento'
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       404:
  *         description: Evento no encontrado
  */
-router.get('/eventos/:id', (req, res) => {
+router.get('/eventos/:id', verificarToken, (req, res) => {
     const { id } = req.params;
     connection.query('SELECT * FROM eventos WHERE id_eventos = ?', [id], (err, results) => {
         if (err) {
@@ -95,6 +133,8 @@ router.get('/eventos/:id', (req, res) => {
  *   post:
  *     summary: Agregar un nuevo evento
  *     tags: [Eventos]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -115,10 +155,12 @@ router.get('/eventos/:id', (req, res) => {
  *                   type: integer
  *       400:
  *         description: Campos obligatorios faltantes
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       500:
  *         description: Error del servidor
  */
-router.post('/eventos', (req, res) => {
+router.post('/eventos', verificarToken, (req, res) => {
     const { nombre_evento } = req.body;
     if (!nombre_evento) {
         return res.status(400).json({ error: "Todos los campos son obligatorios" });
@@ -141,6 +183,8 @@ router.post('/eventos', (req, res) => {
  *   put:
  *     summary: Editar un evento por ID
  *     tags: [Eventos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -157,12 +201,14 @@ router.post('/eventos', (req, res) => {
  *     responses:
  *       200:
  *         description: Evento actualizado correctamente
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       404:
  *         description: Evento no encontrado
  *       500:
  *         description: Error del servidor
  */
-router.put('/eventos/:id', (req, res) => {
+router.put('/eventos/:id', verificarToken, (req, res) => {
     const { id } = req.params;
     const { nombre_evento } = req.body;
     connection.query(
@@ -186,6 +232,8 @@ router.put('/eventos/:id', (req, res) => {
  *   delete:
  *     summary: Eliminar un evento por ID
  *     tags: [Eventos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -196,12 +244,14 @@ router.put('/eventos/:id', (req, res) => {
  *     responses:
  *       200:
  *         description: Evento eliminado correctamente
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       404:
  *         description: Evento no encontrado
  *       500:
  *         description: Error del servidor
  */
-router.delete('/eventos/:id', (req, res) => {
+router.delete('/eventos/:id', verificarToken, (req, res) => {
     const { id } = req.params;
     connection.query('DELETE FROM eventos WHERE id_eventos = ?', [id], (err, results) => {
         if (err) {

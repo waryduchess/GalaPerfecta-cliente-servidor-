@@ -1,6 +1,31 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken'); // Agregar esta importación
 const {connection} = require("../config/config.db");
+const SECRET_KEY = 'EsperemosQueEstaClaveSiFuncionePlease2013460';
+
+/**
+ * Middleware para verificar el token JWT
+ */
+const verificarToken = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ 
+            mensaje: 'Token no proporcionado' 
+        });
+    }
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        req.usuario = decoded;
+        next();
+    } catch (error) {
+        return res.status(401).json({ 
+            mensaje: 'Token inválido' 
+        });
+    }
+};
 
 /**
  * @swagger
@@ -15,6 +40,8 @@ const {connection} = require("../config/config.db");
  *   get:
  *     summary: Obtener todos los usuarios
  *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de usuarios
@@ -24,8 +51,10 @@ const {connection} = require("../config/config.db");
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Usuario'
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  */
-router.get('/usuarios', (req, res) => {
+router.get('/usuarios', verificarToken, (req, res) => {
     connection.query('SELECT * FROM usuarios', (err, results) => {
         if (err) {
             res.status(500).json({ error: err.message });
@@ -41,6 +70,8 @@ router.get('/usuarios', (req, res) => {
  *   get:
  *     summary: Obtener un usuario por ID
  *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -55,10 +86,12 @@ router.get('/usuarios', (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Usuario'
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       404:
  *         description: Usuario no encontrado
  */
-router.get('/usuarios/:id', (req, res) => {
+router.get('/usuarios/:id', verificarToken, (req, res) => {
     const { id } = req.params;
     connection.query('SELECT * FROM usuarios WHERE id_usuarios = ?', [id], (err, results) => {
         if (err) {
@@ -77,6 +110,8 @@ router.get('/usuarios/:id', (req, res) => {
  *   post:
  *     summary: Agregar un nuevo usuario
  *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -97,10 +132,12 @@ router.get('/usuarios/:id', (req, res) => {
  *                   type: integer
  *       400:
  *         description: Campos obligatorios faltantes
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       500:
  *         description: Error del servidor
  */
-router.post('/usuarios', (req, res) => {
+router.post('/usuarios', verificarToken, (req, res) => {
     const { nombre, apellido, correo, numero_telefono, password, id_tipo_user } = req.body;
     
     if (!nombre || !apellido || !correo || !numero_telefono || !password || !id_tipo_user) {
@@ -125,6 +162,8 @@ router.post('/usuarios', (req, res) => {
  *   put:
  *     summary: Editar un usuario por ID
  *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -141,12 +180,14 @@ router.post('/usuarios', (req, res) => {
  *     responses:
  *       200:
  *         description: Usuario actualizado correctamente
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       404:
  *         description: Usuario no encontrado
  *       500:
  *         description: Error del servidor
  */
-router.put('/usuarios/:id', (req, res) => {
+router.put('/usuarios/:id', verificarToken, (req, res) => {
     const { id } = req.params;
     const { nombre, apellido, correo, numero_telefono, password, id_tipo_user } = req.body;
     connection.query(
@@ -170,6 +211,8 @@ router.put('/usuarios/:id', (req, res) => {
  *   delete:
  *     summary: Eliminar un usuario por ID
  *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -180,12 +223,14 @@ router.put('/usuarios/:id', (req, res) => {
  *     responses:
  *       200:
  *         description: Usuario eliminado correctamente
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
  *       404:
  *         description: Usuario no encontrado
  *       500:
  *         description: Error del servidor
  */
-router.delete('/usuarios/:id', (req, res) => {
+router.delete('/usuarios/:id', verificarToken, (req, res) => {
     const { id } = req.params;
     connection.query('DELETE FROM usuarios WHERE id_usuarios = ?', [id], (err, results) => {
         if (err) {
@@ -201,6 +246,11 @@ router.delete('/usuarios/:id', (req, res) => {
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  *   schemas:
  *     Usuario:
  *       type: object
@@ -237,4 +287,3 @@ router.delete('/usuarios/:id', (req, res) => {
  */
 
 module.exports = router;
-//continuara......
