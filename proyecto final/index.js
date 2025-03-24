@@ -6,7 +6,7 @@ const swaggerUi = require("swagger-ui-express");
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3306;
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
