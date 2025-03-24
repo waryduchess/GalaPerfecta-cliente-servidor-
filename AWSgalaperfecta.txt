@@ -1,0 +1,7 @@
+AWS
+Nombre de usuario maestro
+admin
+Contraseña maestra
+4gHBaQMALL6OltzNwhq1
+Punto de enlace
+galaperfecta.cfyayigqgbtk.mx-central-1.rds.amazonaws.com
