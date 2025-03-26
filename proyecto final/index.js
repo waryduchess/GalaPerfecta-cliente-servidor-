@@ -45,5 +45,6 @@ app.listen(PORT, () => {
   console.log(`Servidor en puerto ${PORT}`);
   console.log(`Documentación UI disponible en: http://localhost:${PORT}/api-docs`);
   console.log(`Especificación JSON disponible en: http://localhost:${PORT}/swagger.json`);
+  console.log("ayuda con todo esto please")
 });
 module.exports = app;
