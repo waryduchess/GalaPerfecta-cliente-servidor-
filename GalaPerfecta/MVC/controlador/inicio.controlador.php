@@ -204,10 +204,8 @@ class inicioControladorUsuario
 {
     private $insercionUsuario;
     public $insertada;
-    public $apiUrl = "http://localhost:3306"; // Asigna la URL correcta de tu API
-    
+    public $apiUrl = "http://localhost:3306"; 
     public function __construct() {
-        // Usa $this->apiUrl en lugar de $apiURl (que no está definido)
         $this->insercionUsuario = new UsuarioInsercion($this->apiUrl);
     }
     
@@ -381,37 +379,59 @@ class inicioControladorCrearServicio
     }
 }
 
-class inicioControladorServicio 
+class inicioControladorServicio
 {
     private $insercionServicio;
-    public $insertada;
-
+    private $apiUrl = "http://localhost:3306"; 
+    private $token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywibm9tYnJlIjoiT21hciIsImFwZWxsaWRvIjoiR2FyY2lhIiwiZW1haWwiOiJvbWFyQGdtYWlsLmNvbSIsInRlbGVmb25vIjoiMTIzNDU2Nzg5MCIsImNvbnRyYSI6IjEyIiwidGlwb191c3VhcmlvIjoxLCJpYXQiOjE3NDMwMDQ5MTUsImV4cCI6MTc0MzAwODUxNX0.BHxp1ur0-rMNJQ0zh8SyD5OP4OnkiPERC6dA6aPsoxA";
+    public $insertada = false;
+    public $mensaje = '';
     public function __construct() {
-        $this->insercionServicio = new ServicioInsercion();
+        $this->insercionServicio = new ServicioInsercion($this->apiUrl, $this->token);
     }
-
     public function handleRequest() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $nombre_servicio = $_POST['nombre_servicio'];
-            $descripcion = $_POST['descripcion'];
-            $precio_servicio = $_POST['precio_servicio'];
-        
-            
-           
+            if (
+                isset($_POST['nombre_servicio']) && 
+                isset($_POST['descripcion']) && 
+                isset($_POST['precio_servicio'])
+            ) {
+                $nombre_servicio = htmlspecialchars(trim($_POST['nombre_servicio']));
+                $descripcion = htmlspecialchars(trim($_POST['descripcion']));
+                $precio_servicio = filter_var($_POST['precio_servicio'], FILTER_VALIDATE_FLOAT);
+                if (empty($nombre_servicio) || empty($descripcion) || $precio_servicio === false) {
+                    $this->insertada = false;
+                    $this->mensaje = "Por favor, complete todos los campos correctamente.";
+                    return;
+                }
+                ob_start();
+                $this->insercionServicio->insertarServicio($nombre_servicio, $descripcion, $precio_servicio);
+                $resultado = ob_get_clean();
 
-            $this->insercionServicio->insertarServicio($nombre_servicio, $descripcion, $precio_servicio);
-            $this->insertada = true;
-        }else {
-        $this->insertada = false;
+                if (strpos($resultado, "Servicio agregado correctamente") !== false) {
+                    $this->insertada = true;
+                    $this->mensaje = $resultado;
+                } else {
+                    $this->insertada = false;
+                    $this->mensaje = "Error al insertar el servicio: " . $resultado;
+                }
+            } else {
+                $this->insertada = false;
+                $this->mensaje = "Todos los campos son obligatorios.";
+            }
         }
     }
 
     public function inicio()
     {
-
         require_once "vista/validacionRegistroServicio.php";
     }
 
+    // Getter for mensaje
+    public function getMensaje()
+    {
+        return $this->mensaje;
+    }
 }
 
 
