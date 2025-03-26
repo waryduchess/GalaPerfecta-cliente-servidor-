@@ -5,3 +5,5 @@ Contraseña maestra
 4gHBaQMALL6OltzNwhq1
 Punto de enlace
 galaperfecta.cfyayigqgbtk.mx-central-1.rds.amazonaws.com
+nombre de la base de datos 
+gala
