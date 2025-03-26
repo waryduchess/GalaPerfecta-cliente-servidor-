@@ -136,36 +136,59 @@ class ValidadorUsuario
     
 }
 
-class UsuarioInsercion 
+class UsuarioInsercion
 {
-    private $db;
-
-    public function __construct() {
-        $this->db = baseDatos::conectarBD();
+    private $api_url;
+    private $token;
+    
+    public function __construct($api_url) {
+        $this->api_url = $api_url;
     }
-
+    
     public function insertarUsuario($nombre, $apellido, $correo, $numero_telefono, $password): void {
         try {
-            // Iniciar la transacción
-            $this->db->beginTransaction();
-
-            
-            $this->insertarEnUsuario($nombre, $apellido, $correo, $numero_telefono, $password);
-
-            // Confirmar la transacción
-            $this->db->commit();
+            $this->insertarViaAPI($nombre, $apellido, $correo, $numero_telefono, $password);
             echo "";
         } catch (Exception $e) {
-            // Revertir la transacción en caso de error
-            $this->db->rollback();
             echo "Error: " . $e->getMessage();
         }
     }
-
-    private function insertarEnUsuario($nombre, $apellido, $correo, $numero_telefono, $password): void {
-        $query = "INSERT INTO usuarios (nombre, apellido, correo, numero_telefono, password, id_tipo_user) VALUES (?, ?, ?, ?, ?, 1)";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([$nombre, $apellido, $correo, $numero_telefono, $password]);
+    
+    private function insertarViaAPI($nombre, $apellido, $correo, $numero_telefono, $password): void {
+        // Preparar los datos para enviar a la API
+        $data = [
+            'nombre' => $nombre,
+            'apellido' => $apellido,
+            'correo' => $correo,
+            'numero_telefono' => $numero_telefono,
+            'password' => $password,
+            'id_tipo_user' => 1
+        ];
+        
+        // Inicializar cURL
+        $ch = curl_init($this->api_url . '/usuarios');
+        
+        // Configurar la solicitud cURL
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+           
+        ]);
+        
+        // Ejecutar la solicitud
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        
+        // Cerrar la conexión cURL
+        curl_close($ch);
+        
+        // Verificar la respuesta
+        if ($http_code >= 400) {
+            $error = json_decode($response, true);
+            throw new Exception(isset($error['error']) ? $error['error'] : 'Error al insertar usuario');
+        }
     }
 }
 

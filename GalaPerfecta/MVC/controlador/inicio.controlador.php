@@ -200,38 +200,48 @@ class inicioControladorCargaLogin
     }
 }
 
-class inicioControladorUsuario 
+class inicioControladorUsuario
 {
     private $insercionUsuario;
     public $insertada;
-
+    public $apiUrl = "http://localhost:3306"; // Asigna la URL correcta de tu API
+    
     public function __construct() {
-        $this->insercionUsuario = new UsuarioInsercion();
+        // Usa $this->apiUrl en lugar de $apiURl (que no está definido)
+        $this->insercionUsuario = new UsuarioInsercion($this->apiUrl);
     }
-
+    
     public function handleRequest() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $nombre = $_POST['nombre'];
-            $apellido = $_POST['apellido'];
-            $correo = $_POST['correo'];
-            $numero_telefono = $_POST['numero_telefono'];
-            $password = $_POST['password'];
+            $nombre = $_POST['nombre'] ?? '';
+            $apellido = $_POST['apellido'] ?? '';
+            $correo = $_POST['correo'] ?? '';
+            $numero_telefono = $_POST['numero_telefono'] ?? '';
+            $password = $_POST['password'] ?? '';
             
-           
-
-            $this->insercionUsuario->insertarUsuario($nombre, $apellido, $correo, $numero_telefono, $password);
-            $this->insertada = true;
-        }else {
-        $this->insertada = false;
+            // Validación básica antes de enviar
+            if (!empty($nombre) && !empty($apellido) && !empty($correo) && !empty($numero_telefono) && !empty($password)) {
+                try {
+                    $this->insercionUsuario->insertarUsuario($nombre, $apellido, $correo, $numero_telefono, $password);
+                    $this->insertada = true;
+                } catch (Exception $e) {
+                    $this->insertada = false;
+                   
+                 
+                }
+            } else {
+                $this->insertada = false;
+              
+            }
+        } else {
+            $this->insertada = false;
         }
     }
-
+    
     public function inicio()
     {
-
         require_once "vista/validacionRegistro.php";
     }
-
 }
 
 class inicioControladorAdmin
