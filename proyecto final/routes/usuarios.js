@@ -137,7 +137,7 @@ router.get('/usuarios/:id', verificarToken, (req, res) => {
  *       500:
  *         description: Error del servidor
  */
-router.post('/usuarios', verificarToken, (req, res) => {
+router.post('/usuarios', (req, res) => {
     const { nombre, apellido, correo, numero_telefono, password, id_tipo_user } = req.body;
     
     if (!nombre || !apellido || !correo || !numero_telefono || !password || !id_tipo_user) {

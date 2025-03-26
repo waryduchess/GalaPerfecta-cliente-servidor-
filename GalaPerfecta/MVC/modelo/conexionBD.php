@@ -2,10 +2,10 @@
 
 class baseDatos {
 
-    const HOST = "localhost";
-    const USER = "root";
-    const PASSWORD = "";
-    const DATABASE = "eventos";
+    const HOST = "galaperfecta.cfyayigqgbtk.mx-central-1.rds.amazonaws.com";
+    const USER = "admin";
+    const PASSWORD = "4gHBaQMALL6OltzNwhq1";
+    const DATABASE = "gala";
 
     // Propiedad para almacenar la única instancia de la conexión
     private static $instancia = null;
