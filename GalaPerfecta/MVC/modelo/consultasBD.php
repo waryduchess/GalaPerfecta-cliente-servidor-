@@ -6,17 +6,13 @@ class consultaEventos
     private $eventoConexion;
     public function __construct($conexion)
     {
-     $this->eventoConexion = $conexion;     
+        $this->eventoConexion = $conexion;
     }
 
-    public function consultaImagen()
-    {
-        
-    }
-
+    public function consultaImagen() {}
 }
 
-class Usuario 
+class Usuario
 {
     private $nombre;
     private $apellido;
@@ -25,22 +21,24 @@ class Usuario
     private $password;
     private $tipoUsuario;
     private $idUsuarios;
-    
+
     private $conn;
 
-    public function __construct($conn, $correoIngresado) {
+    public function __construct($conn, $correoIngresado)
+    {
         $this->conn = $conn;
         $this->cargarDatos($correoIngresado);
     }
 
-    private function cargarDatos($correoIngresado) {
+    private function cargarDatos($correoIngresado)
+    {
         try {
             // Consulta SQL para obtener los datos del usuario
             $sql = "SELECT u.id_usuarios, u.nombre, u.apellido, u.correo, u.numero_telefono, u.password, t.id_tipo_user
                     FROM usuarios u
                     LEFT JOIN tipo_user t ON t.id_tipo_user = u.id_tipo_user
                     WHERE u.correo = ?";
-            
+
             // Preparar y ejecutar la consulta
             $stmt = $this->conn->prepare($sql);
             $stmt->bindParam(1, $correoIngresado, PDO::PARAM_STR);
@@ -62,37 +60,43 @@ class Usuario
             } else {
                 throw new Exception("");
             }
-
         } catch (Exception $e) {
             throw new Exception("Error al cargar los datos del usuario: " . $e->getMessage());
         }
     }
 
     // Métodos para obtener la información
-    public function getIdUsuarios() {
+    public function getIdUsuarios()
+    {
         return $this->idUsuarios;
-    } 
-    public function getNombre() {
+    }
+    public function getNombre()
+    {
         return $this->nombre;
     }
 
-    public function getApellido() {
+    public function getApellido()
+    {
         return $this->apellido;
     }
 
-    public function getCorreo() {
+    public function getCorreo()
+    {
         return $this->correo;
     }
 
-    public function getNumeroTelefono() {
+    public function getNumeroTelefono()
+    {
         return $this->numeroTelefono;
     }
 
-    public function getPassword() {
+    public function getPassword()
+    {
         return $this->password;
     }
 
-    public function getTipoUsuario() {
+    public function getTipoUsuario()
+    {
         return $this->tipoUsuario;
     }
 }
@@ -113,15 +117,15 @@ class ValidadorUsuario
             $usuario = new Usuario($this->db, $correoIngresado);
             $this->pruebaID = $usuario->getIdUsuarios();
             $contraseñaAlmacenada = $usuario->getPassword();
-           
-    
+
+
             if (($usuario->getCorreo() == $correoIngresado) && ($usuario->getPassword() == $contraIngresada)) {
                 return [
                     "status" => true,
                     "nombreUsuario" => $usuario->getNombre(),
                     "correo" => $usuario->getCorreo(),
                     "tipoUsuario" => $usuario->getTipoUsuario(),
-                    
+
                 ];
             } else {
                 throw new Exception("Contraseña incorrecta.");
@@ -133,19 +137,19 @@ class ValidadorUsuario
             ];
         }
     }
-    
 }
 
 class UsuarioInsercion
 {
     private $api_url;
-    private $token;
-    
-    public function __construct($api_url) {
+
+    public function __construct($api_url)
+    {
         $this->api_url = $api_url;
     }
-    
-    public function insertarUsuario($nombre, $apellido, $correo, $numero_telefono, $password): void {
+
+    public function insertarUsuario($nombre, $apellido, $correo, $numero_telefono, $password): void
+    {
         try {
             $this->insertarViaAPI($nombre, $apellido, $correo, $numero_telefono, $password);
             echo "";
@@ -153,8 +157,9 @@ class UsuarioInsercion
             echo "Error: " . $e->getMessage();
         }
     }
-    
-    private function insertarViaAPI($nombre, $apellido, $correo, $numero_telefono, $password): void {
+
+    private function insertarViaAPI($nombre, $apellido, $correo, $numero_telefono, $password): void
+    {
         // Preparar los datos para enviar a la API
         $data = [
             'nombre' => $nombre,
@@ -164,26 +169,26 @@ class UsuarioInsercion
             'password' => $password,
             'id_tipo_user' => 1
         ];
-        
+
         // Inicializar cURL
         $ch = curl_init($this->api_url . '/usuarios');
-        
+
         // Configurar la solicitud cURL
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-           
+
         ]);
-        
+
         // Ejecutar la solicitud
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        
+
         // Cerrar la conexión cURL
         curl_close($ch);
-        
+
         // Verificar la respuesta
         if ($http_code >= 400) {
             $error = json_decode($response, true);
@@ -192,7 +197,7 @@ class UsuarioInsercion
     }
 }
 
-class Evento 
+class Evento
 {
     private $conn;
     private $evento_id;
@@ -201,13 +206,15 @@ class Evento
     public $usuarios = [];
     public $total_evento = 0; // Total general de todos los paquetes
 
-    public function __construct($conn, $evento_id) {
+    public function __construct($conn, $evento_id)
+    {
         $this->conn = $conn;
         $this->evento_id = $evento_id;
         $this->cargarDatos();
     }
 
-    private function cargarDatos() {
+    private function cargarDatos()
+    {
         try {
             $this->nombre_evento = $this->obtenerNombreEvento();
             $this->paquetes = $this->obtenerPaquetes();
@@ -217,7 +224,8 @@ class Evento
         }
     }
 
-    private function obtenerNombreEvento() {
+    private function obtenerNombreEvento()
+    {
         $sql = "SELECT nombre_evento FROM eventos WHERE id_eventos = :id_eventos";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':id_eventos', $this->evento_id, PDO::PARAM_INT); // Asociar el valor usando PDO
@@ -225,9 +233,10 @@ class Evento
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['nombre_evento'] ?? 'Nombre del evento no encontrado';
     }
-    
 
-    private function obtenerPaquetes() {
+
+    private function obtenerPaquetes()
+    {
         $sql = "SELECT id_paquete, nombre_paquete, ruta_imagen, descripcion, ruta_imagen1, ruta_imagen2, ruta_imagen3 
                 FROM paquetes WHERE id_eventos = :id_eventos";
         $stmt = $this->conn->prepare($sql);
@@ -252,9 +261,10 @@ class Evento
         }
         return $paquetes;
     }
-//ERRRRRIUBHBDHBDZBDBY    
+    //ERRRRRIUBHBDHBDZBDBY    
 
-    private function obtenerServicios($paquete_id) {
+    private function obtenerServicios($paquete_id)
+    {
         $sql = "SELECT s.id_servicio, s.nombre_servicio, s.descripcion, s.precio_servicio 
                 FROM servicios s
                 INNER JOIN paquete_servicio ps ON s.id_servicio = ps.id_servicio
@@ -268,9 +278,10 @@ class Evento
         }
         return $servicios;
     }
-    
 
-    private function obtenerUsuarios() {
+
+    private function obtenerUsuarios()
+    {
         $sql = "SELECT u.id_usuarios, u.nombre, u.apellido, u.correo 
                 FROM usuarios u
                 INNER JOIN paquetes p ON u.id_usuarios = p.id_usuarios
@@ -284,9 +295,10 @@ class Evento
         }
         return $usuarios;
     }
-    
 
-    private function calcularTotalServicios($servicios) {
+
+    private function calcularTotalServicios($servicios)
+    {
         $total = 0;
         foreach ($servicios as $servicio) {
             $total += $servicio['precio_servicio'];
@@ -294,15 +306,17 @@ class Evento
         return $total;
     }
 }
-class NuestrosEventos 
+class NuestrosEventos
 {
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = baseDatos::conectarBD();
     }
 
-    public function obtenerEvento($evento_id) {
+    public function obtenerEvento($evento_id)
+    {
         try {
             $evento = new Evento($this->db, $evento_id);
             if (empty($evento->nombre_evento)) {
@@ -317,14 +331,14 @@ class NuestrosEventos
 }
 class imagenesParaElCarrusel
 {
-        private $db;
+    private $db;
 
-        public function __construct() {
-        ;
-            $this->db = baseDatos::conectarBD();
-        }
-    
-        public function obtenerPaquetesSinUsuario()
+    public function __construct()
+    {;
+        $this->db = baseDatos::conectarBD();
+    }
+
+    public function obtenerPaquetesSinUsuario()
     {
         $query = "SELECT id_paquete, ruta_imagen FROM paquetes WHERE id_usuarios IS NULL";
 
@@ -333,7 +347,6 @@ class imagenesParaElCarrusel
             $stmt->execute();
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         } catch (PDOException $e) {
             // Manejo de errores
             echo "Error al obtener paquetes: " . $e->getMessage();
@@ -342,20 +355,22 @@ class imagenesParaElCarrusel
     }
 }
 
-class EventoInsercion 
+class EventoInsercion
 {
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = baseDatos::conectarBD();
     }
 
-    public function insertarEvento($nombre_evento): void {
+    public function insertarEvento($nombre_evento): void
+    {
         try {
             // Iniciar la transacción
             $this->db->beginTransaction();
 
-            
+
             $this->insertarEnEvento($nombre_evento);
 
             // Confirmar la transacción
@@ -368,28 +383,31 @@ class EventoInsercion
         }
     }
 
-    private function insertarEnEvento($nombre_evento): void {
+    private function insertarEnEvento($nombre_evento): void
+    {
         $query = "INSERT INTO eventos (nombre_evento) VALUES (?)";
         $stmt = $this->db->prepare($query);
         $stmt->execute([$nombre_evento]);
     }
 }
 
-class PaqueteInsercion 
+class PaqueteInsercion
 {
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = baseDatos::conectarBD();
     }
 
-    public function obtenerServicios() {
+    public function obtenerServicios()
+    {
         $query = "SELECT id_servicio, nombre_servicio FROM servicios";
-    
+
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute();
-    
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             echo "Error al obtener servicios: " . $e->getMessage();
@@ -397,13 +415,14 @@ class PaqueteInsercion
         }
     }
 
-    public function obtenerEventos() {
+    public function obtenerEventos()
+    {
         $query = "SELECT id_eventos, nombre_evento FROM eventos";
-    
+
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute();
-    
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             echo "Error al obtener eventos: " . $e->getMessage();
@@ -412,43 +431,46 @@ class PaqueteInsercion
     }
 
 
-    
-    
 
-    public function insertarPaquete($id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3) {
+
+
+    public function insertarPaquete($id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3)
+    {
         try {
-            
+
             $this->db->beginTransaction();
-    
+
             $this->insertarEnPaquete($id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3);
-    
+
             // Obtener el id del paquete insertado
             $id_paquete = $this->db->lastInsertId();
-    
+
             $this->db->commit();
-    
-            return $id_paquete; 
+
+            return $id_paquete;
         } catch (Exception $e) {
-          
+
             $this->db->rollback();
             echo "Error: " . $e->getMessage();
             return null;
         }
     }
-    
 
-    private function insertarEnPaquete($id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3): int {
+
+    private function insertarEnPaquete($id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3): int
+    {
         $query = "INSERT INTO paquetes (id_eventos, id_usuarios, nombre_paquete, ruta_imagen, descripcion, ruta_imagen1, ruta_imagen2, ruta_imagen3) 
                   VALUES (?, NULL, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->db->prepare($query);
         $stmt->execute([$id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3]);
-        
-        
-        return $this->db->lastInsertId();  
-    }
-    
 
-    public function registrarServiciosPaquete($id_paquete, $servicios) {
+
+        return $this->db->lastInsertId();
+    }
+
+
+    public function registrarServiciosPaquete($id_paquete, $servicios)
+    {
         $query = "INSERT INTO paquete_servicio (id_paquete, id_servicio) VALUES (?, ?)";
         $stmt = $this->db->prepare($query);
 
@@ -456,61 +478,74 @@ class PaqueteInsercion
             $stmt->execute([$id_paquete, $id_servicio]);
         }
     }
-
 }
 
-class ServicioInsercion 
+class ServicioInsercion
 {
-    private $db;
-
-    public function __construct() {
-        $this->db = baseDatos::conectarBD();
+    private $apiUrl;
+    private $apiToken;
+    public function __construct($apiUrl, $apiToken)
+    {
+        $this->apiUrl = $apiUrl;
+        $this->apiToken = $apiToken;
     }
-
-    public function insertarServicio($nombre_servicio,$descripcion,$precio_servicio): void {
+    public function insertarServicio($nombre_servicio, $descripcion, $precio_servicio): void
+    {
         try {
-            // Iniciar la transacción
-            $this->db->beginTransaction();
-
-            
-            $this->insertarEnServicio($nombre_servicio, $descripcion, $precio_servicio);
-
-            // Confirmar la transacción
-            $this->db->commit();
-            echo "";
+            $data = [
+                'nombre_servicio' => $nombre_servicio,
+                'descripcion' => $descripcion,
+                'precio_servicio' => $precio_servicio
+            ];
+            $ch = curl_init($this->apiUrl . '/servicios');
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $this->apiToken
+            ]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $response = curl_exec($ch);
+            if (curl_errno($ch)) {
+                throw new Exception('Error en la solicitud cURL: ' . curl_error($ch));
+            }
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            $responseData = json_decode($response, true);
+            if ($httpCode >= 200 && $httpCode < 300) {
+                echo "Servicio agregado correctamente. ID: " . ($responseData['id'] ?? 'N/A');
+            } else {
+                throw new Exception($responseData['error'] ?? 'Error desconocido');
+            }
         } catch (Exception $e) {
-            // Revertir la transacción en caso de error
-            $this->db->rollback();
             echo "Error: " . $e->getMessage();
         }
     }
-
-    private function insertarEnServicio($nombre_servicio, $descripcion, $precio_servicio): void {
-        $query = "INSERT INTO servicios (nombre_servicio, descripcion, precio_servicio) VALUES (?,?,?)";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([$nombre_servicio, $descripcion, $precio_servicio]);
-    }
 }
 
-class Tarjeta {
+
+class Tarjeta
+{
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = baseDatos::conectarBD();
     }
 
-    public function insertar($idUsuario, $nombreTitular, $numeroTarjeta, $fechaVencimiento, $cvv) {
+    public function insertar($idUsuario, $nombreTitular, $numeroTarjeta, $fechaVencimiento, $cvv)
+    {
         try {
             $sql = "INSERT INTO tarjetas (id_usuarios, nombre_titular, numero_tarjeta, fecha_vencimiento, cvv) 
                     VALUES (:id_usuarios, :nombre_titular, :numero_tarjeta, :fecha_vencimiento, :cvv)";
             $stmt = $this->db->prepare($sql);
-            
+
             $stmt->bindParam(':id_usuarios', $idUsuario, PDO::PARAM_INT);
             $stmt->bindParam(':nombre_titular', $nombreTitular, PDO::PARAM_STR);
             $stmt->bindParam(':numero_tarjeta', $numeroTarjeta, PDO::PARAM_STR); // Puede ser INT o BIGINT en la BD
             $stmt->bindParam(':fecha_vencimiento', $fechaVencimiento, PDO::PARAM_STR);
             $stmt->bindParam(':cvv', $cvv, PDO::PARAM_STR);
-            
+
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
@@ -519,15 +554,18 @@ class Tarjeta {
         }
     }
 }
-class Pagos {
+class Pagos
+{
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = baseDatos::conectarBD();
     }
 
     // Método para registrar un pago al contado
-    public function registrarPagoContado($idUsuarios, $idPaquete, $montoTotal, $fechaPago) {
+    public function registrarPagoContado($idUsuarios, $idPaquete, $montoTotal, $fechaPago)
+    {
         $tipoPago = 'contado';
         $query = "INSERT INTO pagos (id_usuarios, id_paquete, monto_total, tipo_pago, fecha_pago) 
                   VALUES (:id_usuarios, :id_paquete, :monto_total, :tipo_pago, :fecha_pago)";
@@ -547,7 +585,8 @@ class Pagos {
     }
 
     // Método para registrar un pago a plazos
-    public function registrarPagoPlazos($idUsuarios, $idPaquete, $montoTotal, $fechaPago, $plazos) {
+    public function registrarPagoPlazos($idUsuarios, $idPaquete, $montoTotal, $fechaPago, $plazos)
+    {
         try {
             $this->db->beginTransaction();
 
@@ -589,13 +628,15 @@ class Pagos {
         }
     }
 }
-class obtenerPacks {
+class obtenerPacks
+{
     private $conn;
     private $evento_id = null; // Por defecto es null
     public $paquetes = [];
-    public $total_servicios_evento = 0; 
+    public $total_servicios_evento = 0;
 
-    public function __construct($evento_id = null) {
+    public function __construct($evento_id = null)
+    {
         $this->conn = baseDatos::conectarBD();
         $this->evento_id = $evento_id;
 
@@ -604,7 +645,8 @@ class obtenerPacks {
         }
     }
 
-    private function cargarPaquetesYServicios() {
+    private function cargarPaquetesYServicios()
+    {
         try {
             if ($this->evento_id) {
                 $this->paquetes = $this->obtenerPaquetes();
@@ -615,7 +657,8 @@ class obtenerPacks {
         }
     }
 
-    public function obtenerTodosLosEventos() {
+    public function obtenerTodosLosEventos()
+    {
         $sql = "SELECT id_eventos, nombre_evento FROM eventos";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
@@ -630,7 +673,8 @@ class obtenerPacks {
         return $eventos;
     }
 
-    private function obtenerPaquetes() {
+    private function obtenerPaquetes()
+    {
         $sql = "SELECT id_paquete, nombre_paquete 
                 FROM paquetes 
                 WHERE id_eventos = :id_eventos";
@@ -648,7 +692,8 @@ class obtenerPacks {
         return $paquetes;
     }
 
-    private function calcularTotalServiciosEvento() {
+    private function calcularTotalServiciosEvento()
+    {
         $sql = "SELECT SUM(s.precio_servicio) AS total_servicios
                 FROM servicios s
                 INNER JOIN paquete_servicio ps ON s.id_servicio = ps.id_servicio
@@ -663,21 +708,23 @@ class obtenerPacks {
     }
 }
 
-class cotizacionInsercion 
+class cotizacionInsercion
 {
     private $db;
 
-    public function __construct() {
-        $this->db = baseDatos::conectarBD(); 
+    public function __construct()
+    {
+        $this->db = baseDatos::conectarBD();
     }
 
-    public function obtenerServiciosCotizacion() {
+    public function obtenerServiciosCotizacion()
+    {
         $query = "SELECT id_servicio, nombre_servicio FROM servicios";
-    
+
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute();
-    
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             echo "Error al obtener servicios: " . $e->getMessage();
@@ -685,29 +732,18 @@ class cotizacionInsercion
         }
     }
 
-    public function obtenerEventosCotizacion() {
+    public function obtenerEventosCotizacion()
+    {
         $query = "SELECT id_eventos, nombre_evento FROM eventos";  // Verifica que los nombres de las columnas sean correctos
-        
+
         try {
             $stmt = $this->db->prepare($query);
             $stmt->execute();
-        
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);  // Devuelve los eventos como un array asociativo
         } catch (PDOException $e) {
             echo "Error al obtener eventos: " . $e->getMessage();
             return [];
         }
     }
-    
-
-
-
 }
-
-
-
-
-
-
-   
-?>
