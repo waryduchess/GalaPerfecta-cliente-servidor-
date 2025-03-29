@@ -1,5 +1,6 @@
 <?php
 require_once "conexionBD.php";
+require_once "conexionAPIl.php";
 
 class consultaEventos
 {
@@ -26,6 +27,7 @@ class Usuario
 
     public function __construct($conn, $correoIngresado)
     {
+        
         $this->conn = $conn;
         $this->cargarDatos($correoIngresado);
     }
