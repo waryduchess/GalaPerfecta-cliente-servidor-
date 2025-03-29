@@ -285,5 +285,39 @@ router.delete('/usuarios/:id', verificarToken, (req, res) => {
  *         password: "password123"
  *         id_tipo_user: 1
  */
+router.get('/correo/:correo', verificarToken, (req, res) => {
+    const { correo } = req.params;
+  
+    if (!correo) {
+      return res.status(400).json({ error: "El parámetro 'correo' es requerido en la URL." });
+    }
+  
+    connection.query(
+      `SELECT 
+        u.id_usuarios, 
+        u.nombre, 
+        u.apellido, 
+        u.correo, 
+        u.numero_telefono, 
+        u.password, 
+        t.id_tipo_user
+      FROM usuarios u
+      LEFT JOIN tipo_user t ON t.id_tipo_user = u.id_tipo_user
+      WHERE u.correo = ?`,
+      [correo],
+      (err, rows) => {
+        if (err) {
+          console.error("Error en la consulta SQL:", err);
+          return res.status(500).json({ error: "Error interno del servidor." });
+        }
+  
+        if (rows.length === 0) {
+          return res.status(404).json({ error: "Usuario no encontrado." });
+        }
+  
+        res.json(rows[0]);
+      }
+    );
+});
 
 module.exports = router;
