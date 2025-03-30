@@ -1,6 +1,6 @@
 <?php
 require_once "conexionBD.php";
-require_once "conexionAPIl.php";
+
 
 class consultaEventos
 {
@@ -13,6 +13,7 @@ class consultaEventos
     public function consultaImagen() {}
 }
 
+
 class Usuario
 {
     private $nombre;
@@ -22,56 +23,64 @@ class Usuario
     private $password;
     private $tipoUsuario;
     private $idUsuarios;
+    private const API_BASE_URL = "http://localhost:3306"; // Cambiado a un puerto típico para Node.js
 
-    private $conn;
-
-    public function __construct($conn, $correoIngresado)
+    public function __construct($correoIngresado)
     {
-        
-        $this->conn = $conn;
         $this->cargarDatos($correoIngresado);
     }
 
     private function cargarDatos($correoIngresado)
     {
         try {
-            // Consulta SQL para obtener los datos del usuario
-            $sql = "SELECT u.id_usuarios, u.nombre, u.apellido, u.correo, u.numero_telefono, u.password, t.id_tipo_user
-                    FROM usuarios u
-                    LEFT JOIN tipo_user t ON t.id_tipo_user = u.id_tipo_user
-                    WHERE u.correo = ?";
-
-            // Preparar y ejecutar la consulta
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bindParam(1, $correoIngresado, PDO::PARAM_STR);
-            $stmt->execute();
-
-            // Obtener el resultado de la consulta
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            // Verificar si se encontraron resultados
-            if ($resultado) {
-                // Asignar los valores obtenidos
-                $this->idUsuarios = $resultado["id_usuarios"];
-                $this->nombre = $resultado['nombre'];
-                $this->apellido = $resultado['apellido'];
-                $this->correo = $resultado['correo'];
-                $this->numeroTelefono = $resultado['numero_telefono'];
-                $this->password = $resultado['password'];
-                $this->tipoUsuario = $resultado['id_tipo_user'];
+            $url = self::API_BASE_URL . '/correo/' . urlencode($correoIngresado);
+           
+            // Inicializar cURL
+            $ch = curl_init($url);
+           
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json'
+            ]);
+           
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+           
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+           
+            curl_close($ch);
+           
+            if ($httpCode == 200) {
+                $usuario = json_decode($response, true);
+               
+                if ($usuario && is_array($usuario)) {
+                    $this->idUsuarios = $usuario["id_usuarios"] ?? null;
+                    $this->nombre = $usuario['nombre'] ?? '';
+                    $this->apellido = $usuario['apellido'] ?? '';
+                    $this->correo = $usuario['correo'] ?? '';
+                    $this->numeroTelefono = $usuario['numero_telefono'] ?? '';
+                    $this->password = $usuario['password'] ?? '';
+                    $this->tipoUsuario = $usuario['id_tipo_user'] ?? null;
+                } else {
+                    throw new Exception("Respuesta del servidor no válida");
+                }
             } else {
-                throw new Exception("");
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
             }
         } catch (Exception $e) {
             throw new Exception("Error al cargar los datos del usuario: " . $e->getMessage());
         }
     }
 
-    // Métodos para obtener la información
     public function getIdUsuarios()
     {
         return $this->idUsuarios;
     }
+
     public function getNombre()
     {
         return $this->nombre;
@@ -105,32 +114,31 @@ class Usuario
 
 class ValidadorUsuario
 {
-    private $db;
     public $pruebaID;
 
     public function __construct()
     {
-        $this->db = baseDatos::conectarBD();
     }
 
     public function validarCredenciales($correoIngresado, $contraIngresada)
     {
         try {
-            $usuario = new Usuario($this->db, $correoIngresado);
+            if (empty($correoIngresado) || empty($contraIngresada)) {
+                throw new Exception("Correo y contraseña son requeridos");
+            }
+            $usuario = new Usuario($correoIngresado);
             $this->pruebaID = $usuario->getIdUsuarios();
             $contraseñaAlmacenada = $usuario->getPassword();
-
-
-            if (($usuario->getCorreo() == $correoIngresado) && ($usuario->getPassword() == $contraIngresada)) {
+            if ($usuario->getCorreo() === $correoIngresado && $contraseñaAlmacenada === $contraIngresada) {
                 return [
                     "status" => true,
+                    "idUsuario" => $usuario->getIdUsuarios(),
                     "nombreUsuario" => $usuario->getNombre(),
                     "correo" => $usuario->getCorreo(),
-                    "tipoUsuario" => $usuario->getTipoUsuario(),
-
+                    "tipoUsuario" => $usuario->getTipoUsuario()
                 ];
             } else {
-                throw new Exception("Contraseña incorrecta.");
+                throw new Exception("Credenciales incorrectas");
             }
         } catch (Exception $e) {
             return [
