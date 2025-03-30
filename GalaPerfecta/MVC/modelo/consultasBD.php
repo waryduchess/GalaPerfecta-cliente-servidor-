@@ -13,6 +13,7 @@ class consultaEventos
     public function consultaImagen() {}
 }
 
+
 class Usuario
 {
     private $nombre;
@@ -22,8 +23,7 @@ class Usuario
     private $password;
     private $tipoUsuario;
     private $idUsuarios;
-
-    private const API_BASE_URL ="http://localhost:3306/";
+    private const API_BASE_URL = "http://localhost:3000"; // Cambiado a un puerto típico para Node.js
 
     public function __construct($correoIngresado)
     {
@@ -34,43 +34,41 @@ class Usuario
     {
         try {
             $url = self::API_BASE_URL . '/correo/' . urlencode($correoIngresado);
-            
+           
             // Inicializar cURL
             $ch = curl_init($url);
-            
-            // Configurar opciones de cURL
+           
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json'
             ]);
-            
-            // Ejecutar la petición
+           
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            
-            // Verificar errores
+           
             if (curl_errno($ch)) {
                 throw new Exception("Error en la conexión: " . curl_error($ch));
             }
-            
-            // Cerrar la sesión cURL
+           
             curl_close($ch);
-            
-            // Procesar la respuesta
+           
             if ($httpCode == 200) {
                 $usuario = json_decode($response, true);
-                
-                // Asignar los valores obtenidos
-                $this->idUsuarios = $usuario["id_usuarios"];
-                $this->nombre = $usuario['nombre'];
-                $this->apellido = $usuario['apellido'];
-                $this->correo = $usuario['correo'];
-                $this->numeroTelefono = $usuario['numero_telefono'];
-                $this->password = $usuario['password'];
-                $this->tipoUsuario = $usuario['id_tipo_user'];
+               
+                if ($usuario && is_array($usuario)) {
+                    $this->idUsuarios = $usuario["id_usuarios"] ?? null;
+                    $this->nombre = $usuario['nombre'] ?? '';
+                    $this->apellido = $usuario['apellido'] ?? '';
+                    $this->correo = $usuario['correo'] ?? '';
+                    $this->numeroTelefono = $usuario['numero_telefono'] ?? '';
+                    $this->password = $usuario['password'] ?? '';
+                    $this->tipoUsuario = $usuario['id_tipo_user'] ?? null;
+                } else {
+                    throw new Exception("Respuesta del servidor no válida");
+                }
             } else {
                 $errorData = json_decode($response, true);
-                $errorMessage = $errorData['error'] ?? 'Usuario no encontrado';
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
                 throw new Exception($errorMessage);
             }
         } catch (Exception $e) {
@@ -78,7 +76,6 @@ class Usuario
         }
     }
 
-    // Métodos getters (se mantienen igual)
     public function getIdUsuarios()
     {
         return $this->idUsuarios;
@@ -114,6 +111,7 @@ class Usuario
         return $this->tipoUsuario;
     }
 }
+
 
 class ValidadorUsuario
 {
