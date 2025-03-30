@@ -23,7 +23,7 @@ class Usuario
     private $password;
     private $tipoUsuario;
     private $idUsuarios;
-    private const API_BASE_URL = "http://localhost:3000"; // Cambiado a un puerto típico para Node.js
+    private const API_BASE_URL = "http://localhost:3306"; // Cambiado a un puerto típico para Node.js
 
     public function __construct($correoIngresado)
     {
@@ -111,7 +111,6 @@ class Usuario
         return $this->tipoUsuario;
     }
 }
-
 
 class ValidadorUsuario
 {
