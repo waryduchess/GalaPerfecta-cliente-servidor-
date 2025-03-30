@@ -24,8 +24,7 @@ class Usuario
     private $tipoUsuario;
     private $idUsuarios;
     private $token;
-    private const API_BASE_URL = "http://localhost:3306"; // Cambiado a un puerto típico para Node.js
-    
+    private const API_BASE_URL = "http://localhost:3306"; 
     public function __construct($correoIngresado)
     {
         $this->cargarDatos($correoIngresado);
@@ -36,7 +35,6 @@ class Usuario
         try {
             $url = self::API_BASE_URL . '/correo/' . urlencode($correoIngresado);
            
-            // Inicializar cURL
             $ch = curl_init($url);
            
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -55,25 +53,18 @@ class Usuario
            
             if ($httpCode == 200) {
                 $data = json_decode($response, true);
-                
-                // Ahora la respuesta tiene un formato diferente con 'usuario' y 'token'
                 if ($data && isset($data['usuario']) && isset($data['token'])) {
-                    // Almacenar el token
                     $this->token = $data['token'];
-                    
-                    // Obtener los datos del usuario
                     $usuario = $data['usuario'];
                     
-                    // Asignar los valores a las propiedades
                     $this->idUsuarios = $usuario["id_usuarios"] ?? null;
                     $this->nombre = $usuario['nombre'] ?? '';
                     $this->apellido = $usuario['apellido'] ?? '';
                     $this->correo = $usuario['correo'] ?? '';
                     $this->numeroTelefono = $usuario['numero_telefono'] ?? '';
-                    $this->password = $usuario['password'] ?? ''; // Nota: la API ya no debería devolver la contraseña
+                    $this->password = $usuario['password'] ?? ''; 
                     $this->tipoUsuario = $usuario['id_tipo_user'] ?? null;
                 } 
-                // Para mantener compatibilidad con la versión anterior de la API
                 elseif ($data && is_array($data)) {
                     $this->idUsuarios = $data["id_usuarios"] ?? null;
                     $this->nombre = $data['nombre'] ?? '';
@@ -82,8 +73,7 @@ class Usuario
                     $this->numeroTelefono = $data['numero_telefono'] ?? '';
                     $this->password = $data['password'] ?? '';
                     $this->tipoUsuario = $data['id_tipo_user'] ?? null;
-                    $this->token = null; // No hay token en el formato anterior
-                } 
+                    $this->token = null;  } 
                 else {
                     throw new Exception("Respuesta del servidor no válida");
                 }
@@ -132,7 +122,6 @@ class Usuario
         return $this->tipoUsuario;
     }
     
-    // Nuevo método para obtener el token
     public function getToken()
     {
         return $this->token;
