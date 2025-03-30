@@ -285,7 +285,7 @@ router.delete('/usuarios/:id', verificarToken, (req, res) => {
  *         password: "password123"
  *         id_tipo_user: 1
  */
-router.get('/correo/:correo', verificarToken, (req, res) => {
+router.get('/correo/:correo', (req, res) => {
     const { correo } = req.params;
   
     if (!correo) {

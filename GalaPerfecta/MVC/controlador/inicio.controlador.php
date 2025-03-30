@@ -2,7 +2,8 @@
 
 require_once "modelo/conexionBD.php";
 require_once "modelo/consultasBD.php";
-require_once "modelo/conexionAPI.php";
+
+
 
 
 class inicioControlador
@@ -205,7 +206,10 @@ class inicioControladorUsuario
 {
     private $insercionUsuario;
     public $insertada;
-    public $apiUrl = APIConnection::getInstance();
+    public $apiUrl ="http://localhost:3306/";
+
+    //"http://localhost:3306/";
+     //APIConnection::getInstance();
     public function __construct() {
         $this->insercionUsuario = new UsuarioInsercion($this->apiUrl);
     }
@@ -383,7 +387,7 @@ class inicioControladorCrearServicio
 class inicioControladorServicio
 {
     private $insercionServicio;
-    private $apiUrl = APIConnection::getInstance();
+    private $apiUrl = "http://localhost:3306/";
     private $token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywibm9tYnJlIjoiT21hciIsImFwZWxsaWRvIjoiR2FyY2lhIiwiZW1haWwiOiJvbWFyQGdtYWlsLmNvbSIsInRlbGVmb25vIjoiMTIzNDU2Nzg5MCIsImNvbnRyYSI6IjEyIiwidGlwb191c3VhcmlvIjoxLCJpYXQiOjE3NDMwMDQ5MTUsImV4cCI6MTc0MzAwODUxNX0.BHxp1ur0-rMNJQ0zh8SyD5OP4OnkiPERC6dA6aPsoxA";
     public $insertada = false;
     public $mensaje = '';

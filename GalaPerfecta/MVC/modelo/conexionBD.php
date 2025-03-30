@@ -7,20 +7,14 @@ class baseDatos {
     const PASSWORD = "4gHBaQMALL6OltzNwhq1";
     const DATABASE = "gala";
 
-    // Propiedad para almacenar la única instancia de la conexión
     private static $instancia = null;
 
-    // Constructor privado para evitar instanciación directa
     private function __construct() {
-        // Evita que se cree una instancia desde fuera
     }
 
-    // Clonación deshabilitada
     private function __clone() {
-        // Evita que se clone la instancia
     }
 
-    // Método para obtener la única instancia de la conexión
     public static function conectarBD() {
         if (self::$instancia === null) {
             try {
