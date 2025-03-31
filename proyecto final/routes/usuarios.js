@@ -284,8 +284,7 @@ router.delete('/usuarios/:id', verificarToken, (req, res) => {
  *         numero_telefono: "1234567890"
  *         password: "password123"
  *         id_tipo_user: 1
- */
-router.get('/correo/:correo', (req, res) => {
+ */router.get('/correo/:correo', (req, res) => {
     const { correo } = req.params;
   
     if (!correo) {
@@ -314,10 +313,18 @@ router.get('/correo/:correo', (req, res) => {
         if (rows.length === 0) {
           return res.status(404).json({ error: "Usuario no encontrado." });
         }
-  
-        res.json(rows[0]);
+
+        // Generar el token JWT
+        const usuario = rows[0];
+        const token = jwt.sign(
+          { id: usuario.id_usuarios, correo: usuario.correo, tipo_user: usuario.id_tipo_user },
+          SECRET_KEY,
+          { expiresIn: '1h' } // El token expira en 1 hora
+        );
+
+        // Retornar el usuario junto con el token
+        res.json({ usuario, token });
       }
     );
 });
-
 module.exports = router;

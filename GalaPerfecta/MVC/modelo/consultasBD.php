@@ -23,6 +23,7 @@ class Usuario
     private $password;
     private $tipoUsuario;
     private $idUsuarios;
+    private $token;
     private const API_BASE_URL = "http://localhost:3306"; // Cambiado a un puerto típico para Node.js
 
     public function __construct($correoIngresado)
@@ -31,31 +32,35 @@ class Usuario
     }
 
     private function cargarDatos($correoIngresado)
-    {
-        try {
-            $url = self::API_BASE_URL . '/correo/' . urlencode($correoIngresado);
-           
-            // Inicializar cURL
-            $ch = curl_init($url);
-           
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json'
-            ]);
-           
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-           
-            if (curl_errno($ch)) {
-                throw new Exception("Error en la conexión: " . curl_error($ch));
-            }
-           
-            curl_close($ch);
-           
-            if ($httpCode == 200) {
-                $usuario = json_decode($response, true);
-               
-                if ($usuario && is_array($usuario)) {
+{
+    try {
+        $url = self::API_BASE_URL . '/correo/' . urlencode($correoIngresado);
+
+        // Inicializar cURL
+        $ch = curl_init($url);
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json'
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            throw new Exception("Error en la conexión: " . curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        if ($httpCode == 200) {
+            $data = json_decode($response, true);
+
+            if ($data && is_array($data)) {
+                $usuario = $data['usuario'] ?? null;
+                $token = $data['token'] ?? null;
+
+                if ($usuario) {
                     $this->idUsuarios = $usuario["id_usuarios"] ?? null;
                     $this->nombre = $usuario['nombre'] ?? '';
                     $this->apellido = $usuario['apellido'] ?? '';
@@ -63,18 +68,30 @@ class Usuario
                     $this->numeroTelefono = $usuario['numero_telefono'] ?? '';
                     $this->password = $usuario['password'] ?? '';
                     $this->tipoUsuario = $usuario['id_tipo_user'] ?? null;
-                } else {
-                    throw new Exception("Respuesta del servidor no válida");
+                }
+
+                // Guardar el token si está disponible
+                if ($token) {
+                    $this->token = $token;
                 }
             } else {
-                $errorData = json_decode($response, true);
-                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
-                throw new Exception($errorMessage);
+                throw new Exception("Respuesta del servidor no válida");
             }
-        } catch (Exception $e) {
-            throw new Exception("Error al cargar los datos del usuario: " . $e->getMessage());
+        } else {
+            $errorData = json_decode($response, true);
+            $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+            throw new Exception($errorMessage);
         }
+    } catch (Exception $e) {
+        throw new Exception("Error al cargar los datos del usuario: " . $e->getMessage());
     }
+}
+
+// Agregar un método para obtener el token
+public function getToken()
+{
+    return $this->token ?? null;
+}
 
     public function getIdUsuarios()
     {
@@ -135,7 +152,8 @@ class ValidadorUsuario
                     "idUsuario" => $usuario->getIdUsuarios(),
                     "nombreUsuario" => $usuario->getNombre(),
                     "correo" => $usuario->getCorreo(),
-                    "tipoUsuario" => $usuario->getTipoUsuario()
+                    "tipoUsuario" => $usuario->getTipoUsuario(),
+                    "token"=>$usuario->getToken()
                 ];
             } else {
                 throw new Exception("Credenciales incorrectas");
