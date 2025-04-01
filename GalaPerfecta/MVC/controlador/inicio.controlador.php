@@ -574,6 +574,35 @@ class PaqueteController {
     }
 }
 
+class inicioControladorTablaUsuarios
+{
+    private $modeloUsuarios;
+
+    public function __construct()
+    {
+        // Inicializar la clase TodosLosUsuarios
+        $this->modeloUsuarios = new TodosLosUsuarios();
+    }
+
+    public function mostrarTablaUsuarios()
+    {
+        try {
+            // Obtener la lista de usuarios desde el modelo
+            $usuarios = $this->modeloUsuarios->getUsuarios();
+            // Retornar los usuarios
+            return $usuarios;
+        } catch (Exception $e) {
+            // Manejar errores y mostrar un mensaje en la vista
+            $error = $e->getMessage();
+            return []; // Retornar un array vacío en caso de error
+        }
+    }
+    public function inicio(){
+        require_once "vista/tablaUsuarios.php";
+
+    }
+}
+
 
 
 

@@ -171,6 +171,83 @@ class ValidadorUsuario
     }
 }
 
+class TodosLosUsuarios
+{
+    private $usuarios = [];
+    private const API_BASE_URL = "http://localhost:3306"; // Cambiado a un puerto típico para Node.js
+
+    public function __construct()
+    {
+        $this->cargarUsuarios();
+    }
+
+    private function cargarUsuarios()
+    {
+        try {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+
+            $token = $_SESSION['token'];
+            $url = self::API_BASE_URL . '/usuarios';
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token // Incluir el token en los encabezados
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            curl_close($ch);
+
+            if ($httpCode == 200) {
+                $data = json_decode($response, true);
+
+                if ($data && is_array($data)) {
+                    foreach ($data as $usuario) {
+                        $this->usuarios[] = [
+                            'id_usuarios' => $usuario['id_usuarios'] ?? null,
+                            'nombre' => $usuario['nombre'] ?? '',
+                            'apellido' => $usuario['apellido'] ?? '',
+                            'correo' => $usuario['correo'] ?? '',
+                            'numero_telefono' => $usuario['numero_telefono'] ?? '',
+                            'password' => $usuario['password'] ?? '',
+                            'id_tipo_user' => $usuario['id_tipo_user'] ?? null
+                        ];
+                    }
+                } else {
+                    throw new Exception("Respuesta del servidor no válida");
+                }
+            } else {
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
+            }
+        } catch (Exception $e) {
+            throw new Exception("Error al cargar los datos de los usuarios: " . $e->getMessage());
+        }
+    }
+
+    public function getUsuarios()
+    {
+        return $this->usuarios;
+    }
+}
+
 class UsuarioInsercion
 {
     private $api_url;

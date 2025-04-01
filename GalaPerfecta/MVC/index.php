@@ -58,7 +58,7 @@ switch ($controlador) {
         break;
 
     case 'cargaRegistroEvento':
-         $controladorObjeto = new inicioControladorEvento();
+        $controladorObjeto = new inicioControladorEvento();
         ejecutarAccion($controladorObjeto, $accion, $_POST);
         break;
 
@@ -67,31 +67,34 @@ switch ($controlador) {
         ejecutarAccion($controladorObjeto, $accion, $_POST);
         break;
     case 'cargaRegistroPaquete':
-            $controladorObjeto = new inicioControladorPaquete();
-           ejecutarAccion($controladorObjeto, $accion, $_POST);
-           break;
+        $controladorObjeto = new inicioControladorPaquete();
+        ejecutarAccion($controladorObjeto, $accion, $_POST);
+        break;
     case 'crearServicio':
-            $controladorObjeto = new inicioControladorCrearServicio();
-            ejecutarAccion($controladorObjeto, $accion, $_POST);
-            break;
+        $controladorObjeto = new inicioControladorCrearServicio();
+        ejecutarAccion($controladorObjeto, $accion, $_POST);
+        break;
 
     case 'cargaRegistroServicio':
-            $controladorObjeto = new inicioControladorServicio();
-            ejecutarAccion($controladorObjeto, $accion, $_POST);
-            break;
+        $controladorObjeto = new inicioControladorServicio();
+        ejecutarAccion($controladorObjeto, $accion, $_POST);
+        break;
     case 'procesoPago':
         $controladorObjeto = new ControladorTarjeta();
-        ejecutarAccion($controladorObjeto,$accion,$_POST);
+        ejecutarAccion($controladorObjeto, $accion, $_POST);
         break;
     case 'contado':
         $controladorObjeto = new mandarAContado();
-        ejecutarAccion($controladorObjeto,$accion,$_POST);
+        ejecutarAccion($controladorObjeto, $accion, $_POST);
         break;
-        case 'plazos':
-            $controladorObjeto = new mandarAPlazos();
-            ejecutarAccion($controladorObjeto,$accion,$_POST);
-            break;
-
+    case 'plazos':
+        $controladorObjeto = new mandarAPlazos();
+        ejecutarAccion($controladorObjeto, $accion, $_POST);
+        break;
+    case 'tablaUsuario':
+        $controladorObjeto = new inicioControladorTablaUsuarios();
+        ejecutarAccion($controladorObjeto, $accion, $_POST);
+        break;
 }
 
 function ejecutarAccion($controladorObjeto, $accion, $parametros = [])

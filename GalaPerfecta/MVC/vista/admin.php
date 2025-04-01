@@ -35,6 +35,10 @@
                     <a class="nav-link" href="index.php?c=crearServicio">Crear servicios <span class="sr-only"></span></a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="index.php?c=tablaUsuario">tabla de Usuarios <span class="sr-only"></span></a>
+                </li>
+                
+                <li class="nav-item">
                     <a class="nav-link" href="index.php">Salir <span class="sr-only"></span></a>
                 </li>
             </ul>
