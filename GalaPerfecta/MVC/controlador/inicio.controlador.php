@@ -597,11 +597,46 @@ class inicioControladorTablaUsuarios
             return []; // Retornar un array vacío en caso de error
         }
     }
+
+    public function eliminarUsuario($id_usuario)
+    {
+        try {
+            // Llamar al método de eliminación en el modelo
+            $resultado = $this->modeloUsuarios->eliminarUsuario($id_usuario);
+            return $resultado;
+        } catch (Exception $e) {
+            // Manejar errores
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
+    }
+
+    public function actualizarUsuario($id_usuario, $nombre, $apellido, $correo, $numero_telefono, $password, $id_tipo_user)
+    {
+        try {
+            // Llamar al método de actualización en el modelo
+            $resultado = $this->modeloUsuarios->actualizarUsuario(
+                $id_usuario, 
+                $nombre, 
+                $apellido, 
+                $correo, 
+                $numero_telefono, 
+                $password, 
+                $id_tipo_user
+            );
+            return $resultado;
+        } catch (Exception $e) {
+            // Manejar errores
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
+    }
+
     public function inicio(){
         require_once "vista/tablaUsuarios.php";
-
     }
 }
+
 
 
 

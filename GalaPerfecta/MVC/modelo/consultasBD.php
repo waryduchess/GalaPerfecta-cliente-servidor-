@@ -246,7 +246,131 @@ class TodosLosUsuarios
     {
         return $this->usuarios;
     }
+
+    public function eliminarUsuario($id_usuario)
+    {
+        try {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+
+            $token = $_SESSION['token'];
+            $url = self::API_BASE_URL . '/usuarios/' . $id_usuario;
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            curl_close($ch);
+
+            if ($httpCode == 200 || $httpCode == 204) {
+                // Actualizar la lista local de usuarios eliminando el usuario
+                $this->usuarios = array_filter($this->usuarios, function($usuario) use ($id_usuario) {
+                    return $usuario['id_usuarios'] != $id_usuario;
+                });
+                return true;
+            } else {
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
+            }
+        } catch (Exception $e) {
+            throw new Exception("Error al eliminar el usuario: " . $e->getMessage());
+        }
+    }
+
+    public function actualizarUsuario($id_usuario, $nombre, $apellido, $correo, $numero_telefono, $password, $id_tipo_user)
+    {
+        try {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+
+            $token = $_SESSION['token'];
+            $url = self::API_BASE_URL . '/usuarios/' . $id_usuario;
+
+            // Preparar los datos para enviar a la API
+            $data = [
+                'id_usuarios' => $id_usuario,
+                'nombre' => $nombre,
+                'apellido' => $apellido,
+                'correo' => $correo,
+                'numero_telefono' => $numero_telefono,
+                'password' => $password,
+                'id_tipo_user' => $id_tipo_user
+            ];
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");  // Usar PUT para actualizar
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            curl_close($ch);
+
+            if ($httpCode == 200) {
+                // Actualizar el usuario en la lista local
+                foreach ($this->usuarios as $key => $usuario) {
+                    if ($usuario['id_usuarios'] == $id_usuario) {
+                        $this->usuarios[$key] = [
+                            'id_usuarios' => $id_usuario,
+                            'nombre' => $nombre,
+                            'apellido' => $apellido,
+                            'correo' => $correo,
+                            'numero_telefono' => $numero_telefono,
+                            'password' => $password,
+                            'id_tipo_user' => $id_tipo_user
+                        ];
+                        break;
+                    }
+                }
+                return true;
+            } else {
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
+            }
+        } catch (Exception $e) {
+            throw new Exception("Error al actualizar el usuario: " . $e->getMessage());
+        }
+    }
 }
+
 
 class UsuarioInsercion
 {
