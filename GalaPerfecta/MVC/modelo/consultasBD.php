@@ -24,145 +24,108 @@ class Usuario
     private $tipoUsuario;
     private $idUsuarios;
     private $token;
-    private const API_BASE_URL = "http://localhost:3306"; 
+    private const API_BASE_URL = "http://localhost:3306"; // Cambiado a un puerto típico para Node.js
+
     public function __construct($correoIngresado)
     {
         $this->cargarDatos($correoIngresado);
     }
-    
+
     private function cargarDatos($correoIngresado)
-    {
-        try {
-            $url = self::API_BASE_URL . '/correo/' . urlencode($correoIngresado);
-           
-            $ch = curl_init($url);
-           
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json'
-            ]);
-           
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-           
-            if (curl_errno($ch)) {
-                throw new Exception("Error en la conexión: " . curl_error($ch));
-            }
-           
-            curl_close($ch);
-           
-            if ($httpCode == 200) {
-                $data = json_decode($response, true);
-                if ($data && isset($data['usuario']) && isset($data['token'])) {
-                    $this->token = $data['token'];
-                    $usuario = $data['usuario'];
-                    
+{
+    try {
+        $url = self::API_BASE_URL . '/correo/' . urlencode($correoIngresado);
+
+        // Inicializar cURL
+        $ch = curl_init($url);
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json'
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            throw new Exception("Error en la conexión: " . curl_error($ch));
+        }
+
+        curl_close($ch);
+
+        if ($httpCode == 200) {
+            $data = json_decode($response, true);
+
+            if ($data && is_array($data)) {
+                $usuario = $data['usuario'] ?? null;
+                $token = $data['token'] ?? null;
+
+                if ($usuario) {
                     $this->idUsuarios = $usuario["id_usuarios"] ?? null;
                     $this->nombre = $usuario['nombre'] ?? '';
                     $this->apellido = $usuario['apellido'] ?? '';
                     $this->correo = $usuario['correo'] ?? '';
                     $this->numeroTelefono = $usuario['numero_telefono'] ?? '';
-                    $this->password = $usuario['password'] ?? ''; 
+                    $this->password = $usuario['password'] ?? '';
                     $this->tipoUsuario = $usuario['id_tipo_user'] ?? null;
-                } 
-                elseif ($data && is_array($data)) {
-                    $this->idUsuarios = $data["id_usuarios"] ?? null;
-                    $this->nombre = $data['nombre'] ?? '';
-                    $this->apellido = $data['apellido'] ?? '';
-                    $this->correo = $data['correo'] ?? '';
-                    $this->numeroTelefono = $data['numero_telefono'] ?? '';
-                    $this->password = $data['password'] ?? '';
-                    $this->tipoUsuario = $data['id_tipo_user'] ?? null;
-                    $this->token = null;  } 
-                else {
-                    throw new Exception("Respuesta del servidor no válida");
+                }
+
+                // Guardar el token si está disponible
+                if ($token) {
+                    $this->token = $token;
                 }
             } else {
-                $errorData = json_decode($response, true);
-                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
-                throw new Exception($errorMessage);
+                throw new Exception("Respuesta del servidor no válida");
             }
-        } catch (Exception $e) {
-            throw new Exception("Error al cargar los datos del usuario: " . $e->getMessage());
+        } else {
+            $errorData = json_decode($response, true);
+            $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+            throw new Exception($errorMessage);
         }
+    } catch (Exception $e) {
+        throw new Exception("Error al cargar los datos del usuario: " . $e->getMessage());
     }
-    
+}
+
+// Agregar un método para obtener el token
+public function getToken()
+{
+    return $this->token ?? null;
+}
+
     public function getIdUsuarios()
     {
         return $this->idUsuarios;
     }
-    
+
     public function getNombre()
     {
         return $this->nombre;
     }
-    
+
     public function getApellido()
     {
         return $this->apellido;
     }
-    
+
     public function getCorreo()
     {
         return $this->correo;
     }
-    
+
     public function getNumeroTelefono()
     {
         return $this->numeroTelefono;
     }
-    
+
     public function getPassword()
     {
         return $this->password;
     }
-    
+
     public function getTipoUsuario()
     {
         return $this->tipoUsuario;
-    }
-    
-    public function getToken()
-    {
-        return $this->token;
-    }
-    
-    // Método para usar el token en solicitudes posteriores
-    public function hacerSolicitudAutenticada($endpoint, $metodo = 'GET', $datos = null)
-    {
-        if (!$this->token) {
-            throw new Exception("No hay token disponible para autenticar la solicitud");
-        }
-        
-        $url = self::API_BASE_URL . $endpoint;
-        
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $this->token
-        ]);
-        
-        if ($metodo === 'POST' || $metodo === 'PUT') {
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $metodo);
-            if ($datos) {
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($datos));
-            }
-        }
-        
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        
-        if (curl_errno($ch)) {
-            throw new Exception("Error en la conexión: " . curl_error($ch));
-        }
-        
-        curl_close($ch);
-        
-        return [
-            'codigo' => $httpCode,
-            'respuesta' => json_decode($response, true)
-        ];
     }
 }
 
@@ -189,7 +152,8 @@ class ValidadorUsuario
                     "idUsuario" => $usuario->getIdUsuarios(),
                     "nombreUsuario" => $usuario->getNombre(),
                     "correo" => $usuario->getCorreo(),
-                    "tipoUsuario" => $usuario->getTipoUsuario()
+                    "tipoUsuario" => $usuario->getTipoUsuario(),
+                    "token"=>$usuario->getToken()
                 ];
             } else {
                 throw new Exception("Credenciales incorrectas");

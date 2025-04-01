@@ -144,12 +144,12 @@ class inicioControladorCargaLogin
     private $correo;
     private $password;
     private $validarUsuario;
-
     private $nombreUsuario;
     private $idUsuario;
     private $tipoUsuario;
     private $status;
     private $ideDeveritas;
+    private $token;
 
     public function __construct() {
         $this->correo = $_POST['correo'] ?? null;
@@ -167,6 +167,7 @@ class inicioControladorCargaLogin
             $this->idUsuario = $resultado['idUsuario'] ?? null;
             $this->tipoUsuario = $resultado['tipoUsuario'] ?? null;
             $this->status = $resultado['status'];
+            $this->token = $resultado['token'] ?? null;
         } else {
             echo htmlspecialchars("Usuario no encontrado");
         }
@@ -195,7 +196,9 @@ class inicioControladorCargaLogin
     public function getStatus() {
         return $this->status;
     }
-
+    public function getToken() {
+        return $this->token;
+    }
     public function inicio()
     {
 

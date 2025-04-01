@@ -284,25 +284,21 @@ router.delete('/usuarios/:id', verificarToken, (req, res) => {
  *         numero_telefono: "1234567890"
  *         password: "password123"
  *         id_tipo_user: 1
- */
-
-//este ENDPOINT se utiliza para el inicio de sesion
-//aqui se generara el token el cual sirva para verificar los demas servicios 
-router.get('/correo/:correo', (req, res) => {
+ */router.get('/correo/:correo', (req, res) => {
     const { correo } = req.params;
- 
+  
     if (!correo) {
       return res.status(400).json({ error: "El parámetro 'correo' es requerido en la URL." });
     }
- 
+  
     connection.query(
-      `SELECT
-        u.id_usuarios,
-        u.nombre,
-        u.apellido,
-        u.correo,
-        u.numero_telefono,
-        u.password,
+      `SELECT 
+        u.id_usuarios, 
+        u.nombre, 
+        u.apellido, 
+        u.correo, 
+        u.numero_telefono, 
+        u.password, 
         t.id_tipo_user
       FROM usuarios u
       LEFT JOIN tipo_user t ON t.id_tipo_user = u.id_tipo_user
@@ -313,35 +309,22 @@ router.get('/correo/:correo', (req, res) => {
           console.error("Error en la consulta SQL:", err);
           return res.status(500).json({ error: "Error interno del servidor." });
         }
- 
+  
         if (rows.length === 0) {
           return res.status(404).json({ error: "Usuario no encontrado." });
         }
-        
-        // Crear un objeto con los datos que quieres incluir en el token
-        const usuario = rows[0];
-        
-        // No incluir la contraseña en el token por seguridad
-        const { password, ...usuarioSinPassword } = usuario;
-        
+
         // Generar el token JWT
+        const usuario = rows[0];
         const token = jwt.sign(
-          { 
-            id: usuario.id_usuarios,
-            correo: usuario.correo,
-            tipo_usuario: usuario.id_tipo_user
-          }, 
-          JWT_SECRET,
-          { expiresIn: '24h' } // El token expira en 24 horas
+          { id: usuario.id_usuarios, correo: usuario.correo, tipo_user: usuario.id_tipo_user },
+          SECRET_KEY,
+          { expiresIn: '1h' } // El token expira en 1 hora
         );
-        
-        // Retornar los datos del usuario y el token
-        res.json({
-          usuario: usuarioSinPassword,
-          token
-        });
+
+        // Retornar el usuario junto con el token
+        res.json({ usuario, token });
       }
     );
 });
-
 module.exports = router;
