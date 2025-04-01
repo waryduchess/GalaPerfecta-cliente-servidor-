@@ -73,6 +73,10 @@ class Usuario
                 // Guardar el token si está disponible
                 if ($token) {
                     $this->token = $token;
+                    if (session_status() === PHP_SESSION_NONE) {
+                        session_start();
+                    }
+                    $_SESSION['token'] = $token;
                 }
             } else {
                 throw new Exception("Respuesta del servidor no válida");
