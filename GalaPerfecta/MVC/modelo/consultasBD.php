@@ -562,6 +562,7 @@ class NuestrosEventos
         }
     }
 }
+//ya esta el carrusel
 class imagenesParaElCarrusel
 {
     private $apiUrl;
@@ -973,23 +974,26 @@ class obtenerPacks
 
 class cotizacionInsercion
 {
-    private $db;
+    private $apiBaseUrl;
 
     public function __construct()
     {
-        $this->db = baseDatos::conectarBD();
+        // URL base de la API
+        $this->apiBaseUrl = "http://localhost:3306"; // Cambia el puerto si es necesario
     }
 
     public function obtenerServiciosCotizacion()
     {
-        $query = "SELECT id_servicio, nombre_servicio FROM servicios";
-
         try {
-            $stmt = $this->db->prepare($query);
-            $stmt->execute();
+            $url = $this->apiBaseUrl . "/servicios"; // Endpoint de servicios
+            $response = $this->realizarSolicitudGET($url);
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
+            if (is_array($response)) {
+                return $response; // Retorna los servicios como un array
+            } else {
+                throw new Exception("Respuesta del servidor no válida.");
+            }
+        } catch (Exception $e) {
             echo "Error al obtener servicios: " . $e->getMessage();
             return [];
         }
@@ -997,16 +1001,67 @@ class cotizacionInsercion
 
     public function obtenerEventosCotizacion()
     {
-        $query = "SELECT id_eventos, nombre_evento FROM eventos";  // Verifica que los nombres de las columnas sean correctos
-
         try {
-            $stmt = $this->db->prepare($query);
-            $stmt->execute();
+            $url = $this->apiBaseUrl . "/eventos"; // Endpoint de eventos
+            $response = $this->realizarSolicitudGET($url);
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);  // Devuelve los eventos como un array asociativo
-        } catch (PDOException $e) {
+            if (is_array($response)) {
+                return $response; // Retorna los eventos como un array
+            } else {
+                throw new Exception("Respuesta del servidor no válida.");
+            }
+        } catch (Exception $e) {
             echo "Error al obtener eventos: " . $e->getMessage();
             return [];
+        }
+    }
+
+    private function realizarSolicitudGET($url)
+    {
+        try {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+
+            $token = $_SESSION['token'];
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            // Configurar cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token // Incluir el token en los encabezados
+            ]);
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            // Cerrar la conexión cURL
+            curl_close($ch);
+
+            // Verificar el código de respuesta HTTP
+            if ($httpCode >= 200 && $httpCode < 300) {
+                return json_decode($response, true); // Decodificar la respuesta JSON
+            } else {
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
+            }
+        } catch (Exception $e) {
+            throw new Exception("Error al realizar la solicitud GET: " . $e->getMessage());
         }
     }
 }
