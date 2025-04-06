@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { connection } = require('../config/config.db'); // Asegúrate de que la conexión a la base de datos esté configurada
-
-// Endpoint para obtener paquetes sin usuario
+const { connection } = require('../config/config.db'); 
 router.get('/carrusel', async (req, res) => {
     const query = "SELECT id_paquete, ruta_imagen FROM paquetes WHERE id_usuarios IS NULL";
 

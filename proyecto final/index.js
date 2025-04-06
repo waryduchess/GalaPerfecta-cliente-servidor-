@@ -41,6 +41,8 @@ app.use(require("./routes/servicios"));
 app.use(require("./routes/eventos"));
 app.use(require("./routes/jsonwt"));
 app.use(require("./routes/imagenes"));
+app.use(require("./routes/totalServicios"));
+app.use(require("./routes/paqueteXEvento"));
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor en puerto ${PORT}`);
