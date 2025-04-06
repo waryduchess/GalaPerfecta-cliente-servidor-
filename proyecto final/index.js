@@ -40,6 +40,7 @@ app.use(require("./routes/usuarios"));
 app.use(require("./routes/servicios"));
 app.use(require("./routes/eventos"));
 app.use(require("./routes/jsonwt"));
+app.use(require("./routes/imagenes"));
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor en puerto ${PORT}`);

@@ -564,23 +564,53 @@ class NuestrosEventos
 }
 class imagenesParaElCarrusel
 {
-    private $db;
+    private $apiUrl;
 
     public function __construct()
-    {;
-        $this->db = baseDatos::conectarBD();
+    {
+        // URL base del endpoint de la API
+        $this->apiUrl = "http://localhost:3306/carrusel"; // Cambia el puerto si es necesario
     }
 
     public function obtenerPaquetesSinUsuario()
     {
-        $query = "SELECT id_paquete, ruta_imagen FROM paquetes WHERE id_usuarios IS NULL";
-
         try {
-            $stmt = $this->db->prepare($query);
-            $stmt->execute();
+            // Inicializar cURL
+            $ch = curl_init($this->apiUrl);
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
+            // Configurar cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json'
+            ]);
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            // Cerrar la conexión cURL
+            curl_close($ch);
+
+            // Verificar el código de respuesta HTTP
+            if ($httpCode >= 200 && $httpCode < 300) {
+                // Decodificar la respuesta JSON
+                $data = json_decode($response, true);
+                if (is_array($data)) {
+                    return $data; // Retornar los datos obtenidos
+                } else {
+                    throw new Exception("Respuesta del servidor no válida.");
+                }
+            } else {
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
+            }
+        } catch (Exception $e) {
             // Manejo de errores
             echo "Error al obtener paquetes: " . $e->getMessage();
             return [];
