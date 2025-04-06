@@ -32,70 +32,70 @@ class Usuario
     }
 
     private function cargarDatos($correoIngresado)
-{
-    try {
-        $url = self::API_BASE_URL . '/correo/' . urlencode($correoIngresado);
+    {
+        try {
+            $url = self::API_BASE_URL . '/correo/' . urlencode($correoIngresado);
 
-        // Inicializar cURL
-        $ch = curl_init($url);
+            // Inicializar cURL
+            $ch = curl_init($url);
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json'
-        ]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json'
+            ]);
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        if (curl_errno($ch)) {
-            throw new Exception("Error en la conexión: " . curl_error($ch));
-        }
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
 
-        curl_close($ch);
+            curl_close($ch);
 
-        if ($httpCode == 200) {
-            $data = json_decode($response, true);
+            if ($httpCode == 200) {
+                $data = json_decode($response, true);
 
-            if ($data && is_array($data)) {
-                $usuario = $data['usuario'] ?? null;
-                $token = $data['token'] ?? null;
+                if ($data && is_array($data)) {
+                    $usuario = $data['usuario'] ?? null;
+                    $token = $data['token'] ?? null;
 
-                if ($usuario) {
-                    $this->idUsuarios = $usuario["id_usuarios"] ?? null;
-                    $this->nombre = $usuario['nombre'] ?? '';
-                    $this->apellido = $usuario['apellido'] ?? '';
-                    $this->correo = $usuario['correo'] ?? '';
-                    $this->numeroTelefono = $usuario['numero_telefono'] ?? '';
-                    $this->password = $usuario['password'] ?? '';
-                    $this->tipoUsuario = $usuario['id_tipo_user'] ?? null;
-                }
-
-                // Guardar el token si está disponible
-                if ($token) {
-                    $this->token = $token;
-                    if (session_status() === PHP_SESSION_NONE) {
-                        session_start();
+                    if ($usuario) {
+                        $this->idUsuarios = $usuario["id_usuarios"] ?? null;
+                        $this->nombre = $usuario['nombre'] ?? '';
+                        $this->apellido = $usuario['apellido'] ?? '';
+                        $this->correo = $usuario['correo'] ?? '';
+                        $this->numeroTelefono = $usuario['numero_telefono'] ?? '';
+                        $this->password = $usuario['password'] ?? '';
+                        $this->tipoUsuario = $usuario['id_tipo_user'] ?? null;
                     }
-                    $_SESSION['token'] = $token;
+
+                    // Guardar el token si está disponible
+                    if ($token) {
+                        $this->token = $token;
+                        if (session_status() === PHP_SESSION_NONE) {
+                            session_start();
+                        }
+                        $_SESSION['token'] = $token;
+                    }
+                } else {
+                    throw new Exception("Respuesta del servidor no válida");
                 }
             } else {
-                throw new Exception("Respuesta del servidor no válida");
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
             }
-        } else {
-            $errorData = json_decode($response, true);
-            $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
-            throw new Exception($errorMessage);
+        } catch (Exception $e) {
+            throw new Exception("Error al cargar los datos del usuario: " . $e->getMessage());
         }
-    } catch (Exception $e) {
-        throw new Exception("Error al cargar los datos del usuario: " . $e->getMessage());
     }
-}
 
-// Agregar un método para obtener el token
-public function getToken()
-{
-    return $this->token ?? null;
-}
+    // Agregar un método para obtener el token
+    public function getToken()
+    {
+        return $this->token ?? null;
+    }
 
     public function getIdUsuarios()
     {
@@ -137,9 +137,7 @@ class ValidadorUsuario
 {
     public $pruebaID;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function validarCredenciales($correoIngresado, $contraIngresada)
     {
@@ -157,7 +155,7 @@ class ValidadorUsuario
                     "nombreUsuario" => $usuario->getNombre(),
                     "correo" => $usuario->getCorreo(),
                     "tipoUsuario" => $usuario->getTipoUsuario(),
-                    "token"=>$usuario->getToken()
+                    "token" => $usuario->getToken()
                 ];
             } else {
                 throw new Exception("Credenciales incorrectas");
@@ -283,7 +281,7 @@ class TodosLosUsuarios
 
             if ($httpCode == 200 || $httpCode == 204) {
                 // Actualizar la lista local de usuarios eliminando el usuario
-                $this->usuarios = array_filter($this->usuarios, function($usuario) use ($id_usuario) {
+                $this->usuarios = array_filter($this->usuarios, function ($usuario) use ($id_usuario) {
                     return $usuario['id_usuarios'] != $id_usuario;
                 });
                 return true;
@@ -892,16 +890,17 @@ class Pagos
         }
     }
 }
+//Parcialmente terminado
 class obtenerPacks
 {
-    private $conn;
-    private $evento_id = null; // Por defecto es null
+    private $apiBaseUrl;
+    private $evento_id = null;
     public $paquetes = [];
     public $total_servicios_evento = 0;
 
     public function __construct($evento_id = null)
     {
-        $this->conn = baseDatos::conectarBD();
+        $this->apiBaseUrl = "http://localhost:3306";
         $this->evento_id = $evento_id;
 
         if ($this->evento_id) {
@@ -923,55 +922,102 @@ class obtenerPacks
 
     public function obtenerTodosLosEventos()
     {
-        $sql = "SELECT id_eventos, nombre_evento FROM eventos";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute();
+        try {
+            $url = $this->apiBaseUrl . "/eventos"; // Endpoint de eventos
+            $response = $this->realizarSolicitudGET($url);
 
-        $eventos = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $eventos[] = [
-                'id_eventos' => $row['id_eventos'],
-                'nombre_evento' => $row['nombre_evento']
-            ];
+            if (is_array($response)) {
+                return $response; // Retorna los eventos como un array
+            } else {
+                throw new Exception("Respuesta del servidor no válida.");
+            }
+        } catch (Exception $e) {
+            throw new Exception("Error al obtener eventos: " . $e->getMessage());
         }
-        return $eventos;
     }
 
     private function obtenerPaquetes()
     {
-        $sql = "SELECT id_paquete, nombre_paquete 
-                FROM paquetes 
-                WHERE id_eventos = :id_eventos";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':id_eventos', $this->evento_id, PDO::PARAM_INT);
-        $stmt->execute();
+        try {
+            $url = $this->apiBaseUrl . "/paquetesEvento/{$this->evento_id}"; // Endpoint de paquetes
+            $response = $this->realizarSolicitudGET($url);
 
-        $paquetes = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $paquetes[] = [
-                'id_paquete' => $row['id_paquete'],
-                'nombre_paquete' => $row['nombre_paquete']
-            ];
+            if (is_array($response)) {
+                return $response; // Retorna los paquetes como un array
+            } else {
+                throw new Exception("Respuesta del servidor no válida.");
+            }
+        } catch (Exception $e) {
+            throw new Exception("Error al obtener paquetes: " . $e->getMessage());
         }
-        return $paquetes;
     }
 
     private function calcularTotalServiciosEvento()
     {
-        $sql = "SELECT SUM(s.precio_servicio) AS total_servicios
-                FROM servicios s
-                INNER JOIN paquete_servicio ps ON s.id_servicio = ps.id_servicio
-                INNER JOIN paquetes p ON ps.id_paquete = p.id_paquete
-                WHERE p.id_eventos = :id_eventos";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':id_eventos', $this->evento_id, PDO::PARAM_INT);
-        $stmt->execute();
+        try {
+            $url = $this->apiBaseUrl . "/total/{$this->evento_id}"; // Endpoint de total de servicios
+            $response = $this->realizarSolicitudGET($url);
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['total_servicios'] ?? 0;
+            if (isset($response['total_servicios'])) {
+                return $response['total_servicios']; // Retorna el total de servicios
+            } else {
+                throw new Exception("Respuesta del servidor no válida.");
+            }
+        } catch (Exception $e) {
+            throw new Exception("Error al calcular el total de servicios: " . $e->getMessage());
+        }
+    }
+
+    private function realizarSolicitudGET($url)
+    {
+        try {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+
+            $token = $_SESSION['token'];
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            // Configurar cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token // Incluir el token en los encabezados
+            ]);
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            // Cerrar la conexión cURL
+            curl_close($ch);
+
+            // Verificar el código de respuesta HTTP
+            if ($httpCode >= 200 && $httpCode < 300) {
+                return json_decode($response, true); // Decodificar la respuesta JSON
+            } else {
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
+            }
+        } catch (Exception $e) {
+            throw new Exception("Error al realizar la solicitud GET: " . $e->getMessage());
+        }
     }
 }
-
+//Ya terminado
 class cotizacionInsercion
 {
     private $apiBaseUrl;
