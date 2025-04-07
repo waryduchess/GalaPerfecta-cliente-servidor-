@@ -1,7 +1,7 @@
 <?php
 require_once "conexionBD.php";
 
-
+/*
 class consultaEventos
 {
     private $eventoConexion;
@@ -12,7 +12,7 @@ class consultaEventos
 
     public function consultaImagen() {}
 }
-
+*/
 
 class Usuario
 {

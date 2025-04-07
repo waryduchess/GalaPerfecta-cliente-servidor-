@@ -13,7 +13,6 @@ class inicioControlador
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -28,7 +27,6 @@ class inicioControladorPrincipalCliente
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -67,7 +65,6 @@ class inicioControladorLogin
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -82,7 +79,6 @@ class inicioControladorpagoContado
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -97,7 +93,6 @@ class inicioControladorpagoPlazos
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -113,7 +108,6 @@ class inicioControladorCotizacion
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -129,7 +123,6 @@ class inicioControladorPagos
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -257,7 +250,6 @@ class inicioControladorAdmin
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -271,7 +263,6 @@ class inicioControladorCrearEvento
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -317,7 +308,6 @@ class inicioControladorCrearPaquete
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -379,7 +369,6 @@ class inicioControladorCrearServicio
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -391,13 +380,26 @@ class inicioControladorCrearServicio
 class inicioControladorServicio
 {
     private $insercionServicio;
-    private $apiUrl = "http://localhost:3306/";
-    private $token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywibm9tYnJlIjoiT21hciIsImFwZWxsaWRvIjoiR2FyY2lhIiwiZW1haWwiOiJvbWFyQGdtYWlsLmNvbSIsInRlbGVmb25vIjoiMTIzNDU2Nzg5MCIsImNvbnRyYSI6IjEyIiwidGlwb191c3VhcmlvIjoxLCJpYXQiOjE3NDMwMDQ5MTUsImV4cCI6MTc0MzAwODUxNX0.BHxp1ur0-rMNJQ0zh8SyD5OP4OnkiPERC6dA6aPsoxA";
+    private $apiUrl = "http://localhost:3306";
+    private $token;
     public $insertada = false;
     public $mensaje = '';
+
     public function __construct() {
+        // Verificar si el token está disponible en la sesión
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (isset($_SESSION['token'])) {
+            $this->token = $_SESSION['token'];
+        } else {
+            $this->token = null; // Manejar el caso en que no haya token
+        }
+
         $this->insercionServicio = new ServicioInsercion($this->apiUrl, $this->token);
     }
+
     public function handleRequest() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (
@@ -408,11 +410,13 @@ class inicioControladorServicio
                 $nombre_servicio = htmlspecialchars(trim($_POST['nombre_servicio']));
                 $descripcion = htmlspecialchars(trim($_POST['descripcion']));
                 $precio_servicio = filter_var($_POST['precio_servicio'], FILTER_VALIDATE_FLOAT);
+
                 if (empty($nombre_servicio) || empty($descripcion) || $precio_servicio === false) {
                     $this->insertada = false;
                     $this->mensaje = "Por favor, complete todos los campos correctamente.";
                     return;
                 }
+
                 ob_start();
                 $this->insercionServicio->insertarServicio($nombre_servicio, $descripcion, $precio_servicio);
                 $resultado = ob_get_clean();
@@ -450,7 +454,6 @@ class mandarAContado
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
@@ -464,7 +467,6 @@ class mandarAPlazos
 
     public function __construct()
     {
-        $this->modelo = new consultaEventos(baseDatos::conectarBD());
     }
 
     public function inicio()
