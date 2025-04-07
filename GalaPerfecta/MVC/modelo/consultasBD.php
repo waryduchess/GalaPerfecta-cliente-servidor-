@@ -427,7 +427,7 @@ class UsuarioInsercion
         }
     }
 }
-
+//Esta Aun no queda EVENTO ES LA QUE SE ME DIFICULTA
 class Evento
 {
     private $conn;
@@ -619,37 +619,67 @@ class imagenesParaElCarrusel
 
 class EventoInsercion
 {
-    private $db;
+    private $apiBaseUrl;
 
     public function __construct()
     {
-        $this->db = baseDatos::conectarBD();
+        $this->apiBaseUrl = "http://localhost:3306";
     }
 
     public function insertarEvento($nombre_evento): void
     {
         try {
-            // Iniciar la transacción
-            $this->db->beginTransaction();
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
 
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
 
-            $this->insertarEnEvento($nombre_evento);
+            $token = $_SESSION['token'];
 
-            // Confirmar la transacción
-            $this->db->commit();
-            echo "";
+            // Preparar los datos para enviar a la API
+            $data = [
+                'nombre_evento' => $nombre_evento
+            ];
+
+            // Inicializar cURL
+            $ch = curl_init($this->apiBaseUrl . '/eventos');
+
+            // Configurar la solicitud cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token // Incluir el token en los encabezados
+            ]);
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            // Cerrar la conexión cURL
+            curl_close($ch);
+
+            // Verificar la respuesta
+            if ($httpCode >= 200 && $httpCode < 300) {
+                echo "Evento insertado correctamente.";
+            } else {
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
+            }
         } catch (Exception $e) {
-            // Revertir la transacción en caso de error
-            $this->db->rollback();
-            echo "Error: " . $e->getMessage();
+            echo "Error al insertar el evento: " . $e->getMessage();
         }
-    }
-
-    private function insertarEnEvento($nombre_evento): void
-    {
-        $query = "INSERT INTO eventos (nombre_evento) VALUES (?)";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([$nombre_evento]);
     }
 }
 
