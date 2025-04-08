@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { connection } = require('../config/config.db'); 
 router.get('/carrusel', async (req, res) => {
-    const query = "SELECT id_paquete, ruta_imagen FROM paquetes WHERE id_usuarios IS NULL";
+    const query = "SELECT id_paquete,nombre_paquete, ruta_imagen, descripcion FROM paquetes WHERE id_usuarios IS NULL";
 
     try {
         connection.query(query, (err, results) => {
