@@ -537,6 +537,7 @@ class Evento
         return $total;
     }
 }
+//Igual aun no esta listo es muy dificl;
 class NuestrosEventos
 {
     private $db;
@@ -694,38 +695,113 @@ class PaqueteInsercion
 
     public function obtenerServicios()
     {
-        $query = "SELECT id_servicio, nombre_servicio FROM servicios";
-
         try {
-            $stmt = $this->db->prepare($query);
-            $stmt->execute();
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+
+            $token = $_SESSION['token'];
+            $url = "http://localhost:3306/servicios"; // URL del endpoint de servicios
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            // Configurar cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token // Incluir el token en los encabezados
+            ]);
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            // Cerrar la conexión cURL
+            curl_close($ch);
+
+            // Verificar el código de respuesta HTTP
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $data = json_decode($response, true);
+                if (is_array($data)) {
+                    return $data; // Retorna los servicios como un array
+                } else {
+                    throw new Exception("Respuesta del servidor no válida.");
+                }
+            } else {
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
+            }
+        } catch (Exception $e) {
             echo "Error al obtener servicios: " . $e->getMessage();
             return [];
         }
     }
 
+
     public function obtenerEventos()
     {
-        $query = "SELECT id_eventos, nombre_evento FROM eventos";
-
         try {
-            $stmt = $this->db->prepare($query);
-            $stmt->execute();
-
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+    
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+    
+            $token = $_SESSION['token'];
+            $url = "http://localhost:3306/eventos"; // URL del endpoint de eventos
+    
+            // Inicializar cURL
+            $ch = curl_init($url);
+    
+            // Configurar cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token // Incluir el token en los encabezados
+            ]);
+    
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+    
+            curl_close($ch);
+    
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $data = json_decode($response, true);
+                if (is_array($data)) {
+                    return $data;
+                } else {
+                    throw new Exception("Respuesta del servidor no válida.");
+                }
+            } else {
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
+            }
+        } catch (Exception $e) {
             echo "Error al obtener eventos: " . $e->getMessage();
             return [];
         }
     }
-
-
-
-
-
     public function insertarPaquete($id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3)
     {
         try {
@@ -749,15 +825,71 @@ class PaqueteInsercion
     }
 
 
-    private function insertarEnPaquete($id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3): int
+    public function insertarEnPaquete($id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1 = null, $ruta_imagen2 = null, $ruta_imagen3 = null)
     {
-        $query = "INSERT INTO paquetes (id_eventos, id_usuarios, nombre_paquete, ruta_imagen, descripcion, ruta_imagen1, ruta_imagen2, ruta_imagen3) 
-                  VALUES (?, NULL, ?, ?, ?, ?, ?, ?)";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute([$id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3]);
+        try {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
 
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
 
-        return $this->db->lastInsertId();
+            $token = $_SESSION['token'];
+            $url = "http://localhost:3306/insertarPaquete"; 
+            $data = [
+                'id_eventos' => $id_eventos,
+                'nombre_paquete' => $nombre_paquete,
+                'ruta_imagen' => $ruta_imagen,
+                'descripcion' => $descripcion,
+                'ruta_imagen1' => $ruta_imagen1,
+                'ruta_imagen2' => $ruta_imagen2,
+                'ruta_imagen3' => $ruta_imagen3
+            ];
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            // Configurar cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token // Incluir el token en los encabezados
+            ]);
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            // Cerrar la conexión cURL
+            curl_close($ch);
+
+            // Verificar el código de respuesta HTTP
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $data = json_decode($response, true);
+                if (isset($data['message'])) {
+                    return $data; // Retorna la respuesta del servidor
+                } else {
+                    throw new Exception("Respuesta del servidor no válida.");
+                }
+            } else {
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
+            }
+        } catch (Exception $e) {
+            echo "Error al insertar el paquete: " . $e->getMessage();
+            return null;
+        }
     }
 
 

@@ -64,7 +64,7 @@
                                 <img src="<?= $paquete['ruta_imagen'] ?>" class="d-block w-100" alt="Imagen <?= $paquete['id_paquete'] ?>">
                             </a>
                             <div class="carousel-caption d-none d-md-block">
-                                <h3><?= $paquete['titulo'] ?? 'Evento Especial' ?></h3>
+                                <h3><?= $paquete['nombre_paquete'] ?? 'Evento Especial' ?></h3>
                                 <p><?= $paquete['descripcion'] ?? 'Disfruta de un momento único con nuestro paquete exclusivo.' ?></p>
                             </div>
                         </div>
