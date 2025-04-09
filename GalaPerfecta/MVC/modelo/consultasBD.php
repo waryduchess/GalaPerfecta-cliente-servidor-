@@ -895,14 +895,62 @@ class PaqueteInsercion
 
     public function registrarServiciosPaquete($id_paquete, $servicios)
     {
-        $query = "INSERT INTO paquete_servicio (id_paquete, id_servicio) VALUES (?, ?)";
-        $stmt = $this->db->prepare($query);
+        try {
+            // Verificar que los servicios sean un array no vacío
+            if (!is_array($servicios) || empty($servicios)) {
+                throw new Exception("La lista de servicios debe ser un array no vacío.");
+            }
 
-        foreach ($servicios as $id_servicio) {
-            $stmt->execute([$id_paquete, $id_servicio]);
+            // Construir la URL del endpoint
+            $url = "http://localhost:3302/serviciosXpaquete/". $id_paquete;
+
+            // Preparar los datos para enviar al endpoint
+            $data = [
+                "servicios" => $servicios
+            ];
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $_SESSION['token'] // Asegúrate de que el token esté disponible en la sesión
+            ]);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            curl_close($ch);
+
+            // Manejar la respuesta del servidor
+            if ($httpCode === 200) {
+                $responseData = json_decode($response, true);
+                if (isset($responseData['message'])) {
+                    return $responseData['message'];
+                } else {
+                    throw new Exception("Respuesta inesperada del servidor.");
+                }
+            } elseif ($httpCode === 400) {
+                throw new Exception("Error en la solicitud: " . $response);
+            } elseif ($httpCode === 401) {
+                throw new Exception("No autorizado: Verifica el token.");
+            } else {
+                throw new Exception("Error del servidor: Código HTTP " . $httpCode);
+            }
+        } catch (Exception $e) {
+            throw new Exception("Error al registrar servicios en el paquete: " . $e->getMessage());
         }
     }
 }
+
 
 class ServicioInsercion
 {

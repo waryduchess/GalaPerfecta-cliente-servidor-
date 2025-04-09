@@ -42,7 +42,6 @@ router.get('/paquetesEvento/:id',verificarToken, (req, res) => {
         res.json(results);
     });
 });
-module.exports = router;
 
 /**
  * @swagger
@@ -137,3 +136,5 @@ router.post('/insertarPaquete', verificarToken, (req, res) => {
         }
     );
 });
+
+module.exports = router;
