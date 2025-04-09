@@ -24,7 +24,7 @@ class Usuario
     private $tipoUsuario;
     private $idUsuarios;
     private $token;
-    private const API_BASE_URL = "http://localhost:3306"; // Cambiado a un puerto típico para Node.js
+    private const API_BASE_URL = "http://localhost:3002"; // Cambiado a un puerto típico para Node.js
 
     public function __construct($correoIngresado)
     {
@@ -172,7 +172,7 @@ class ValidadorUsuario
 class TodosLosUsuarios
 {
     private $usuarios = [];
-    private const API_BASE_URL = "http://localhost:3306"; // Cambiado a un puerto típico para Node.js
+    private const API_BASE_URL = "http://localhost:3002"; // Cambiado a un puerto típico para Node.js
 
     public function __construct()
     {
@@ -569,7 +569,7 @@ class imagenesParaElCarrusel
     public function __construct()
     {
         // URL base del endpoint de la API
-        $this->apiUrl = "http://localhost:3306/carrusel"; // Cambia el puerto si es necesario
+        $this->apiUrl = "http://localhost:3002/carrusel"; // Cambia el puerto si es necesario
     }
 
     public function obtenerPaquetesSinUsuario()
@@ -624,7 +624,7 @@ class EventoInsercion
 
     public function __construct()
     {
-        $this->apiBaseUrl = "http://localhost:3306";
+        $this->apiBaseUrl = "http://localhost:3002";
     }
 
     public function insertarEvento($nombre_evento): void
@@ -706,7 +706,7 @@ class PaqueteInsercion
             }
 
             $token = $_SESSION['token'];
-            $url = "http://localhost:3306/servicios"; // URL del endpoint de servicios
+            $url = "http://localhost:3002/servicios"; // URL del endpoint de servicios
 
             // Inicializar cURL
             $ch = curl_init($url);
@@ -763,7 +763,7 @@ class PaqueteInsercion
             }
     
             $token = $_SESSION['token'];
-            $url = "http://localhost:3306/eventos"; // URL del endpoint de eventos
+            $url = "http://localhost:3002/eventos"; // URL del endpoint de eventos
     
             // Inicializar cURL
             $ch = curl_init($url);
@@ -838,7 +838,7 @@ class PaqueteInsercion
             }
 
             $token = $_SESSION['token'];
-            $url = "http://localhost:3306/insertarPaquete"; 
+            $url = "http://localhost:3002/insertarPaquete"; 
             $data = [
                 'id_eventos' => $id_eventos,
                 'nombre_paquete' => $nombre_paquete,
@@ -1062,7 +1062,7 @@ class obtenerPacks
 
     public function __construct($evento_id = null)
     {
-        $this->apiBaseUrl = "http://localhost:3306";
+        $this->apiBaseUrl = "http://localhost:3002";
         $this->evento_id = $evento_id;
 
         if ($this->evento_id) {
@@ -1187,7 +1187,7 @@ class cotizacionInsercion
     public function __construct()
     {
         // URL base de la API
-        $this->apiBaseUrl = "http://localhost:3306"; // Cambia el puerto si es necesario
+        $this->apiBaseUrl = "http://localhost:3002"; // Cambia el puerto si es necesario
     }
 
     public function obtenerServiciosCotizacion()

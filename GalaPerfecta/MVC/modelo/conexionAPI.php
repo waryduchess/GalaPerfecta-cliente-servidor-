@@ -1,7 +1,7 @@
 <?php
 
 class APIConnection {
-    const API_BASE_URL = "http://localhost:3306";  
+    const API_BASE_URL = "http://localhost:3002";  
        private static $instancia = null;
     private function __construct() {
     }

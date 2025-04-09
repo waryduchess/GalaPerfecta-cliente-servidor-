@@ -162,7 +162,7 @@ class inicioControladorCargaLogin
             $this->status = $resultado['status'];
             $this->token = $resultado['token'] ?? null;
         } else {
-            echo htmlspecialchars("Usuario no encontrado");
+            echo htmlspecialchars(" ");
         }
     }
     
@@ -203,7 +203,7 @@ class inicioControladorUsuario
 {
     private $insercionUsuario;
     public $insertada;
-    public $apiUrl ="http://localhost:3306/";
+    public $apiUrl ="http://localhost:3002/";
 
     //"http://localhost:3306/";
      //APIConnection::getInstance();
@@ -380,7 +380,7 @@ class inicioControladorCrearServicio
 class inicioControladorServicio
 {
     private $insercionServicio;
-    private $apiUrl = "http://localhost:3306";
+    private $apiUrl = "http://localhost:3002";
     private $token;
     public $insertada = false;
     public $mensaje = '';
