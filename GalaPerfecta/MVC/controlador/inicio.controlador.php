@@ -357,6 +357,11 @@ class inicioControladorPaquete
             $this->insertada = false;
         }
     }
+    public function obtenerEventos(){
+       
+       $idEventos= $this->insercionPaquete->obtenerEventos();
+        return $idEventos;
+    }
 
     public function inicio() {
         require_once "vista/validacionRegistroPaquete.php";

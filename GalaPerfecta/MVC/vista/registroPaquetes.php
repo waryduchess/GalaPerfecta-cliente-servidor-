@@ -1,3 +1,9 @@
+<?php
+require_once 'modelo/consultasBD.php';
+$paqueteInsercion = new PaqueteInsercion();
+$servicios = $paqueteInsercion->obtenerServicios();
+$eventos = $paqueteInsercion->obtenerEventos(); // Obtener los eventos
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -36,9 +42,21 @@
             <div class="form paquete-form active">
                 <h2>Registro de paquetes</h2><br>
                 <form class="login" action="index.php?c=cargaRegistroPaquete" method="POST">
+                    <!-- Combo box para seleccionar el evento -->
                     <div class="input-box">
-                        <input type="text" name="id_eventos" required>
-                        <label>Id del evento</label>
+                        <label for="id_eventos">Selecciona un evento</label>
+                        <select name="id_eventos" id="id_eventos" required>
+                            <option value="" disabled selected>Selecciona un evento</option>
+                            <?php
+                            if (!empty($eventos)) {
+                                foreach ($eventos as $evento) {
+                                    echo "<option value='{$evento['id_eventos']}'>{$evento['nombre_evento']}</option>";
+                                }
+                            } else {
+                                echo "<option value='' disabled>No hay eventos disponibles</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
                     <div class="input-box">
                         <input type="text" name="nombre_paquete" required>
@@ -70,10 +88,7 @@
                         <label>Selecciona los servicios:</label>
                         <div class="checkbox-group">
                             <?php
-                            require_once 'modelo/consultasBD.php';
-                            $paqueteInsercion = new PaqueteInsercion();
-                            $servicios = $paqueteInsercion->obtenerServicios();
-
+                    
                             if (!empty($servicios)) {
                                 foreach ($servicios as $servicio) {
                                     echo "<label><input type='checkbox' name='servicios[]' value='{$servicio['id_servicio']}'> {$servicio['nombre_servicio']}</label>";

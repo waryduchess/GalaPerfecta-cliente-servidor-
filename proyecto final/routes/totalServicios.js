@@ -123,34 +123,26 @@ router.post('/serviciosXpaquete/:id_paquete', verificarToken, (req, res) => {
     const { id_paquete } = req.params;
     const { servicios } = req.body;
 
-    // Validar campos obligatorios
     if (!id_paquete || !Array.isArray(servicios) || servicios.length === 0) {
         return res.status(400).json({ error: "El ID del paquete y la lista de servicios son obligatorios" });
     }
 
-    const query = "INSERT INTO paquete_servicio (id_paquete, id_servicio) VALUES (?, ?)";
+    // Preparar valores para inserción múltiple
+    const values = servicios.map(id_servicio => [id_paquete, id_servicio]);
 
-    // Insertar cada servicio en la tabla paquete_servicio
-    const promises = servicios.map((id_servicio) => {
-        return new Promise((resolve, reject) => {
-            connection.query(query, [id_paquete, id_servicio], (err, results) => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve(results);
-            });
-        });
-    });
-
-    // Ejecutar todas las inserciones
-    Promise.all(promises)
-        .then(() => {
-            res.json({ message: "Servicios registrados correctamente en el paquete" });
-        })
-        .catch((err) => {
+    const query = `
+        INSERT INTO paquete_servicio (id_paquete, id_servicio) 
+        VALUES ?
+        ON DUPLICATE KEY UPDATE id_servicio = VALUES(id_servicio)
+    `;
+    
+    connection.query(query, [values], (err, results) => {
+        if (err) {
             console.error("Error al registrar servicios en el paquete:", err);
-            res.status(500).json({ error: "Error interno del servidor" });
-        });
+            return res.status(500).json({ error: "Error interno del servidor" });
+        }
+        res.json({ message: "Servicios registrados correctamente en el paquete." });
+    });
 });
 
 module.exports = router;
