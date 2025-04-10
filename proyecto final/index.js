@@ -43,6 +43,7 @@ app.use(require("./routes/jsonwt"));
 app.use(require("./routes/imagenes"));
 app.use(require("./routes/totalServicios"));
 app.use(require("./routes/paqueteXEvento"));
+app.use(require("./routes/tarjetas"));
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor en puerto ${PORT}`);

@@ -686,11 +686,10 @@ class EventoInsercion
 
 class PaqueteInsercion
 {
-    private $db;
+   
 
     public function __construct()
     {
-        $this->db = baseDatos::conectarBD();
     }
 
     public function obtenerServicios()
@@ -1038,29 +1037,83 @@ class Pagos
 {
     private $db;
 
+    private $apiBaseUrl;
+
     public function __construct()
     {
-        $this->db = baseDatos::conectarBD();
+        $this->apiBaseUrl = "http://localhost:3002"; // Ajusta el puerto según tu configuración
     }
 
-    // Método para registrar un pago al contado
     public function registrarPagoContado($idUsuarios, $idPaquete, $montoTotal, $fechaPago)
     {
-        $tipoPago = 'contado';
-        $query = "INSERT INTO pagos (id_usuarios, id_paquete, monto_total, tipo_pago, fecha_pago) 
-                  VALUES (:id_usuarios, :id_paquete, :monto_total, :tipo_pago, :fecha_pago)";
-        $stmt = $this->db->prepare($query);
+        try {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
 
-        $stmt->bindParam(':id_usuarios', $idUsuarios);
-        $stmt->bindParam(':id_paquete', $idPaquete);
-        $stmt->bindParam(':monto_total', $montoTotal);
-        $stmt->bindParam(':tipo_pago', $tipoPago);
-        $stmt->bindParam(':fecha_pago', $fechaPago);
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
 
-        if ($stmt->execute()) {
-            return "Pago al contado registrado exitosamente.";
-        } else {
-            return "Error al registrar el pago al contado.";
+            $token = $_SESSION['token'];
+
+            // Preparar los datos para enviar
+            $data = [
+                'idUsuarios' => $idUsuarios,
+                'idPaquete' => $idPaquete,
+                'montoTotal' => $montoTotal,
+                'fechaPago' => $fechaPago
+            ];
+
+            // Configurar la URL del endpoint
+            $url = $this->apiBaseUrl . "/registrar-pago-contado";
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            // Configurar cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token
+            ]);
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            // Cerrar la conexión cURL
+            curl_close($ch);
+
+            // Verificar el código de respuesta HTTP
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $responseData = json_decode($response, true);
+                if (isset($responseData['mensaje'])) {
+                    return [
+                        'error' => false,
+                        'mensaje' => $responseData['mensaje'],
+                        'idPago' => $responseData['idPago'] ?? null
+                    ];
+                } else {
+                    throw new Exception("Respuesta del servidor no válida");
+                }
+            } else {
+                $errorData = json_decode($response, true);
+                throw new Exception($errorData['mensaje'] ?? "Error del servidor (Código HTTP: $httpCode)");
+            }
+        } catch (Exception $e) {
+            return [
+                'error' => true,
+                'mensaje' => "Error al registrar el pago: " . $e->getMessage()
+            ];
         }
     }
 
