@@ -44,7 +44,7 @@ $eventos = $paqueteInsercion->obtenerEventos(); // Obtener los eventos
                 <form class="login" action="index.php?c=cargaRegistroPaquete" method="POST">
                     <!-- Combo box para seleccionar el evento -->
                     <div class="input-box">
-                        <label for="id_eventos">Selecciona un evento</label>
+                        <label for="id_eventos"></label>
                         <select name="id_eventos" id="id_eventos" required>
                             <option value="" disabled selected>Selecciona un evento</option>
                             <?php

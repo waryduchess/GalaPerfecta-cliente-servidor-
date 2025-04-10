@@ -672,7 +672,7 @@ class EventoInsercion
 
             // Verificar la respuesta
             if ($httpCode >= 200 && $httpCode < 300) {
-                echo "Evento insertado correctamente.";
+                echo " ";
             } else {
                 $errorData = json_decode($response, true);
                 $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
