@@ -6,6 +6,16 @@ const SECRET_KEY = 'EsperemosQueEstaClaveSiFuncionePlease2013460';
 
 /**
  * Middleware para verificar el token JWT
+ * 
+ * Este middleware valida el token JWT enviado en el encabezado `Authorization`.
+ * Si el token es válido, se agrega la información del usuario decodificada al objeto `req`.
+ * Si el token no es válido o no se proporciona, se devuelve un error 401.
+ * 
+ * @param {Object} req - Objeto de solicitud HTTP
+ * @param {Object} res - Objeto de respuesta HTTP
+ * @param {Function} next - Función para pasar al siguiente middleware
+ * 
+ * @returns {Object} Respuesta HTTP con error 401 si el token no es válido o no se proporciona
  */
 const verificarToken = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
@@ -26,6 +36,45 @@ const verificarToken = (req, res, next) => {
         });
     }
 };
+
+/**
+ * @swagger
+ * /paquetesEvento/{id}:
+ *   get:
+ *     summary: Obtener paquetes asociados a un evento
+ *     tags: [Paquetes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del evento para obtener los paquetes asociados
+ *     responses:
+ *       200:
+ *         description: Lista de paquetes asociados al evento
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id_paquete:
+ *                     type: integer
+ *                     description: ID del paquete
+ *                   nombre_paquete:
+ *                     type: string
+ *                     description: Nombre del paquete
+ *       400:
+ *         description: ID del evento no proporcionado o inválido
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.get('/paquetesEvento/:id',verificarToken, (req, res) => {
     const { id } = req.params;
     const sql = `

@@ -1,3 +1,5 @@
+//si ves esto rivas esto no se documenta
+//  *               mensaje:
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
