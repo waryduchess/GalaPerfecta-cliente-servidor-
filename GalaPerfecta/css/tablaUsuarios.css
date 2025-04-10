@@ -37,11 +37,16 @@ h1 {
     font-family: Georgia;
     text-align: left;
 }
+.lista{
+    color:#18213b
+}
+
 
 table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.6);
 }
 
 th,
@@ -56,7 +61,7 @@ th {
 }
 
 tr:hover {
-    background-color: #f9f9f9;
+    background-color: #128c7e;
 }
 
 .btn {
@@ -69,12 +74,35 @@ tr:hover {
 }
 
 .btn-editar {
-    background-color: #4CAF50;
+    background-color: #18213b;
     color: white;
 }
 
 .btn-eliminar {
-    background-color: #f44336;
+    background-color: #18213b;
+    color: white;
+}
+.btn-editar:hover {
+    background: #ddc3a7; /* Verde más oscuro al pasar el cursor */
+    color: white;
+}
+.btn-eliminar:hover {
+    background: #ddc3a7; /* Verde más oscuro al pasar el cursor */
+    color: white;
+}
+
+.btn-secondary {
+    width: 30%;
+    padding: 10px;
+    background: #18213b; /* Verde como color principal */
+    color: #fff; /* Texto blanco para contraste */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-secondary:hover {
+    background: #ddc3a7; /* Verde más oscuro al pasar el cursor */
     color: white;
 }
 
