@@ -26,6 +26,39 @@ const verificarToken = (req, res, next) => {
         });
     }
 };
+/**
+ * @swagger
+ * /total/{id}:
+ *   get:
+ *     summary: Calcular el total de servicios de un evento
+ *     tags: [Servicios]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del evento para calcular el total de servicios
+ *     responses:
+ *       200:
+ *         description: Total de servicios calculado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total_servicios:
+ *                   type: number
+ *                   description: Total de los precios de los servicios asociados al evento
+ *       400:
+ *         description: ID del evento no proporcionado o inválido
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.get('/total/:id',verificarToken, (req, res) => {
     const { id } = req.params;
     const sql = `
