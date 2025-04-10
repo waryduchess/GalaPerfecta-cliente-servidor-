@@ -73,5 +73,76 @@ router.get('/total/:id',verificarToken, (req, res) => {
  *                     type: string
  */
 // Obtener paquetes de un evento
+/**
+ * @swagger
+ * /paquetes/{id_paquete}/servicios:
+ *   post:
+ *     summary: Registrar servicios en un paquete
+ *     tags: [Paquetes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id_paquete
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del paquete al que se asociarán los servicios
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               servicios:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: Lista de IDs de servicios a asociar con el paquete
+ *             required:
+ *               - servicios
+ *     responses:
+ *       200:
+ *         description: Servicios registrados correctamente en el paquete
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Campos obligatorios faltantes
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
+ *       500:
+ *         description: Error del servidor
+ */
+router.post('/serviciosXpaquete/:id_paquete', verificarToken, (req, res) => {
+    const { id_paquete } = req.params;
+    const { servicios } = req.body;
+
+    if (!id_paquete || !Array.isArray(servicios) || servicios.length === 0) {
+        return res.status(400).json({ error: "El ID del paquete y la lista de servicios son obligatorios" });
+    }
+
+    // Preparar valores para inserción múltiple
+    const values = servicios.map(id_servicio => [id_paquete, id_servicio]);
+
+    const query = `
+        INSERT INTO paquete_servicio (id_paquete, id_servicio) 
+        VALUES ?
+        ON DUPLICATE KEY UPDATE id_servicio = VALUES(id_servicio)
+    `;
+    
+    connection.query(query, [values], (err, results) => {
+        if (err) {
+            console.error("Error al registrar servicios en el paquete:", err);
+            return res.status(500).json({ error: "Error interno del servidor" });
+        }
+        res.json({ message: "Servicios registrados correctamente en el paquete." });
+    });
+});
 
 module.exports = router;

@@ -757,34 +757,34 @@ class PaqueteInsercion
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
-    
+
             if (!isset($_SESSION['token'])) {
                 throw new Exception("Token no disponible. Por favor, inicie sesión.");
             }
-    
+
             $token = $_SESSION['token'];
             $url = "http://localhost:3002/eventos"; // URL del endpoint de eventos
-    
+
             // Inicializar cURL
             $ch = curl_init($url);
-    
+
             // Configurar cURL
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',
                 'Authorization: Bearer ' . $token // Incluir el token en los encabezados
             ]);
-    
+
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
+
             // Manejo de errores de cURL
             if (curl_errno($ch)) {
                 throw new Exception("Error en la conexión: " . curl_error($ch));
             }
-    
+
             curl_close($ch);
-    
+
             if ($httpCode >= 200 && $httpCode < 300) {
                 $data = json_decode($response, true);
                 if (is_array($data)) {
@@ -805,20 +805,16 @@ class PaqueteInsercion
     public function insertarPaquete($id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3)
     {
         try {
+            // Llamar a insertarEnPaquete y obtener la respuesta
+            $response = $this->insertarEnPaquete($id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3);
 
-            $this->db->beginTransaction();
-
-            $this->insertarEnPaquete($id_eventos, $nombre_paquete, $ruta_imagen, $descripcion, $ruta_imagen1, $ruta_imagen2, $ruta_imagen3);
-
-            // Obtener el id del paquete insertado
-            $id_paquete = $this->db->lastInsertId();
-
-            $this->db->commit();
-
-            return $id_paquete;
+            // Verificar si la inserción fue exitosa y obtener el ID del paquete
+            if ($response && isset($response['id_paquete'])) {
+                return $response['id_paquete'];
+            } else {
+                throw new Exception("No se pudo obtener el ID del paquete insertado");
+            }
         } catch (Exception $e) {
-
-            $this->db->rollback();
             echo "Error: " . $e->getMessage();
             return null;
         }
@@ -838,15 +834,15 @@ class PaqueteInsercion
             }
 
             $token = $_SESSION['token'];
-            $url = "http://localhost:3002/insertarPaquete"; 
+            $url = "http://localhost:3002/insertarPaquete";
             $data = [
                 'id_eventos' => $id_eventos,
                 'nombre_paquete' => $nombre_paquete,
-                'ruta_imagen' => $ruta_imagen,
+                'ruta_imagen' => "../../img/" . $ruta_imagen,
                 'descripcion' => $descripcion,
-                'ruta_imagen1' => $ruta_imagen1,
-                'ruta_imagen2' => $ruta_imagen2,
-                'ruta_imagen3' => $ruta_imagen3
+                'ruta_imagen1' => "../../img/" . $ruta_imagen1,
+                'ruta_imagen2' => "../../img/" . $ruta_imagen2,
+                'ruta_imagen3' => "../../img/" . $ruta_imagen3
             ];
 
             // Inicializar cURL
@@ -895,14 +891,74 @@ class PaqueteInsercion
 
     public function registrarServiciosPaquete($id_paquete, $servicios)
     {
-        $query = "INSERT INTO paquete_servicio (id_paquete, id_servicio) VALUES (?, ?)";
-        $stmt = $this->db->prepare($query);
+        try {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
 
-        foreach ($servicios as $id_servicio) {
-            $stmt->execute([$id_paquete, $id_servicio]);
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+           
+            $token = $_SESSION['token'];
+
+            // Verificar que los servicios sean un array no vacío
+            if (!is_array($servicios) || empty($servicios)) {
+                throw new Exception("La lista de servicios debe ser un array no vacío.");
+            }
+
+            // Construir la URL del endpoint
+            $url ="http://localhost:3002"."/serviciosXpaquete/". $id_paquete;
+
+            // Preparar los datos para enviar
+            $data = [
+                "servicios" => $servicios
+            ];
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            // Configurar cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token
+            ]);
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            // Cerrar la conexión cURL
+            curl_close($ch);
+
+            // Verificar el código de respuesta HTTP
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $data = json_decode($response, true);
+                if (isset($data['message'])) {
+                    return $data['message'];
+                } else {
+                    throw new Exception("Respuesta del servidor no válida.");
+                }
+            } else {
+                $errorData = json_decode($response, true);
+                $errorMessage = $errorData['error'] ?? "Error del servidor (Código HTTP: $httpCode)";
+                throw new Exception($errorMessage);
+            }
+        } catch (Exception $e) {
+            throw new Exception("Error al registrar servicios en el paquete: " . $e->getMessage());
         }
     }
 }
+
 
 class ServicioInsercion
 {
