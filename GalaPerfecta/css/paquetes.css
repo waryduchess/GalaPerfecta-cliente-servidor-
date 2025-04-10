@@ -1,11 +1,13 @@
 body {
-    margin: 0;
     font-family: "Poppins", sans-serif;
-    background-image: url("../img/eventoslogin.png"); /* Fondo general */
+    background-image: url("../img/eventoslogin.png");
+    background-attachment: fixed;  /* Fondo general */
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    padding-top: 80px;
+    
 }
 
 nav {
@@ -15,18 +17,16 @@ nav {
     box-sizing: border-box;
 }
 
-.container,
 .container-paquete {
-    margin-top: 40px;
+    
     display: flex;
-    width: 900px;
+    width: 60%;
     height: 1070px;
     min-height: 700px;
     background: rgba(255, 255, 255, 0.6);
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    position: relative;
+    
 }
 
 /* Sección de bienvenida */
@@ -54,56 +54,44 @@ nav {
 }
 
 /* Contenedor de formularios */
-.form-container {
-    flex: 2;
-    display: flex;
-    position: relative;
-    overflow: hidden;
-}
+
 
 .form-container-paq {
-    flex: 2;
+    flex: 1.5;
     display: flex;
-    position: relative;
-    overflow: hidden;
-    
+    justify-content: center;
+    align-items: center;
+    position: relative; /* Añadido */
+    height: 100%; /* Asegura que ocupe toda la altura */
 }
 /* Formularios */
 .form {
     width: 100%;
     max-width: 400px;
     padding: 30px;
-    position: absolute;
-    top: 60%; /* Ajusta el centrado */
-    transform: translateY(-60%);
-    transition: transform 0.5s ease-in-out;
     background: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
-}
-.login-form {
-    right: 0;
-    transform: translate(100%, -50%);
+    position: relative; /* Cambiado de absolute a relative */
+    margin: 20px; /* Añade espacio alrededor */
+    top: auto; /* Elimina posicionamiento vertical */
+    transform: none; /* Elimina transformaciones */
 }
 
-.register-form {
-    left: 0;
-    transform: translate(-100%, -50%);
-}
+
+
 .paquete-form {
     
-    left: 0;
-    transform: translate(100%, -50%);
-    align-items: center;
+ 
 }
 
 .form.active {
-    transform: translate(0, -50%);
+   
 }
 
 /* Cajas de entrada */
 .input-box {
-    width: 100%;
+   
     margin-bottom: 20px;
     position: relative;
 }
@@ -192,7 +180,7 @@ h1 {
 .checkbox-group {
     display: flex;
     flex-direction: column; /* Alinea los elementos en columna */
-    gap: 10px; /* Espacio entre cada checkbox */
+    gap: 0;
     margin-top: 10px;
 }
 

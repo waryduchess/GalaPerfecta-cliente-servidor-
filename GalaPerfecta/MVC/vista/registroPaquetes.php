@@ -39,7 +39,7 @@ $eventos = $paqueteInsercion->obtenerEventos(); // Obtener los eventos
 
     <div class="container-paquete">
         <div class="form-container-paq">
-            <div class="form paquete-form active">
+            <div class="form ">
                 <h2>Registro de paquetes</h2><br>
                 <form class="login" action="index.php?c=cargaRegistroPaquete" method="POST">
                     <!-- Combo box para seleccionar el evento -->
