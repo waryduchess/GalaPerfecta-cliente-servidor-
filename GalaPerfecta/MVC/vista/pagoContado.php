@@ -1,5 +1,7 @@
 <?php
 session_start();
+require_once 'modelo/consultasBD.php';
+
 if (isset($_SESSION['idUsuario'])) {
     $idUsuarioREAL = $_SESSION['idUsuario'];
 } else {
@@ -39,17 +41,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fechaPago = $_POST['fecha_pago'];
         $montoTotal = $controlador->obtenerTotalServiciosPorEvento($paqueteSeleccionado);
 
-        // Crear array de datos comunes
-        $datos = [
-            'id_usuarios' => $idUsuarioREAL,
-            'id_paquete' => $paqueteSeleccionado,
-            'id_evento' => $eventoSeleccionado,
-            'monto_total' => $montoTotal,
-            'fecha_pago' => $fechaPago,
-            'plazos' => []
-        ];
+        // Agregar validaciones adicionales
+        if ($montoTotal <= 0) {
+            $mensaje = "Error: El monto total debe ser mayor a cero.";
+            // Detener el proceso
+            return;
+        }
 
-        if ($_POST['tipo_pago'] === 'plazos') {
+        if (strtotime($fechaPago) < strtotime('today')) {
+            $mensaje = "Error: La fecha de pago no puede ser anterior a hoy.";
+            // Detener el proceso
+            return;
+        }
+
+        if ($_POST['tipo_pago'] === 'contado') {
+            try {
+                // Crear instancia de la clase Pagos
+                $pagos = new Pagos();
+                
+                // Registrar el pago al contado
+                $resultado = $pagos->registrarPagoContado(
+                    $idUsuarioREAL,
+                    $paqueteSeleccionado,
+                    $montoTotal,
+                    $fechaPago
+                );
+
+                if (!$resultado['error']) {
+                    $mensaje = $resultado['mensaje'];
+                } else {
+                    $mensaje = "Error: " . $resultado['mensaje'];
+                }
+            } catch (Exception $e) {
+                $mensaje = "Error: " . $e->getMessage();
+            }
+        } else {
             // Validar y añadir plazos si están presentes
             if (!empty($_POST['numero_plazo']) && !empty($_POST['fecha_plazo'])) {
                 $numeroPlazo = (int)$_POST['numero_plazo'];
@@ -65,12 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Procesar los datos mediante la clase ProcesarPagoPlazos
             $controladorPago = new ProcesarPagoPlazos($datos);
             $resultado = $controladorPago->procesar();
-        } else {
-            // Procesar los datos mediante la clase ProcesarPagoContado
-            $controladorPago = new ProcesarPagoContado($datos);
-            $resultado = $controladorPago->procesar();
+            $mensaje = $resultado;
         }
-        $mensaje = $resultado;
     } else {
         $mensaje = "Por favor, complete todos los campos requeridos.";
     }
@@ -104,12 +126,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Mostrar mensaje -->
     <?php if (!empty($mensaje)): ?>
-        <p><strong><?= htmlspecialchars($mensaje); ?></strong></p>
-        <?php if (strpos($mensaje, 'exitosamente') !== false): ?>
-            <p style="color: green;">Pago confirmado.</p>
-        <?php else: ?>
-            <p style="color: red;">Hubo un error en el pago.</p>
-        <?php endif; ?>
+        <div class="alert <?= strpos($mensaje, 'Error') !== false ? 'alert-danger' : 'alert-success' ?>">
+            <?= htmlspecialchars($mensaje); ?>
+            <?php if (isset($resultado['idPago'])): ?>
+                <br>ID del Pago: <?= htmlspecialchars($resultado['idPago']); ?>
+            <?php endif; ?>
+        </div>
     <?php endif; ?>
 
     <!-- Formulario para seleccionar evento -->
@@ -151,13 +173,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST">
             <input type="hidden" name="id_evento" value="<?= htmlspecialchars($eventoSeleccionado); ?>">
             <input type="hidden" name="id_paquete" value="<?= htmlspecialchars($paqueteSeleccionado); ?>">
-
-            <!-- Usar el ID de usuario almacenado en la sesión -->
             <input type="hidden" name="id_usuarios" value="<?= htmlspecialchars($idUsuarioREAL); ?>">
 
-            <!-- El monto total se calcula dinámicamente -->
-            <p id="monto_total"><strong>Monto Total del Paquete:</strong>
-                <?= $controlador->obtenerTotalServiciosPorEvento($paqueteSeleccionado); ?>
+            <!-- Mostrar el monto total -->
+            <p id="monto_total">
+                <strong>Monto Total del Paquete: $</strong>
+                <?= number_format($controlador->obtenerTotalServiciosPorEvento($paqueteSeleccionado), 2); ?>
             </p>
 
             <label for="fecha_pago">Fecha de Pago:</label>
@@ -169,21 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <option value="plazos">Plazos</option>
             </select><br><br>
 
-            <div id="plazos_detalles" style="display: none;">
-                <h3>Detalles de los Plazos</h3>
-                <label for="numero_plazo">Número de Plazo:</label>
-                <input type="number" id="numero_plazo" name="numero_plazo" oninput="calcularMontoPlazo()" required><br><br>
-
-                <p id="monto_plazo"></p>
-
-                <label for="fecha_plazo">Fecha del Primer Plazo:</label>
-                <input type="date" id="fecha_plazo" name="fecha_plazo" required><br><br>
-            </div>
-
-            <button type="submit">Registrar</button>
-            <button type="submit" onclick="location.href='?c=procesoPago';">Regresar</button>
-
-
+            <button type="submit">Registrar Pago</button>
         </form>
     <?php endif; ?>
 
