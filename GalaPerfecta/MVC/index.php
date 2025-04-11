@@ -106,10 +106,11 @@ switch ($controlador) {
 
     case 'logout':
         $controladorObjeto = new inicioControladorLogout();
+        ejecutarAccion($controladorObjeto, $accion, $_POST);
+        break;
 
     case 'historial':
         $controladorObjeto = new PagosControlador();
-
         ejecutarAccion($controladorObjeto, $accion, $_POST);
         break;
 }
