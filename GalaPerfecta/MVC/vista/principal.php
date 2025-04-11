@@ -125,6 +125,7 @@
                 <a href="https://x.com/?lang=es"><img src="../../img/reds4.png" class="logo" alt="reds4"></a>
                 <a href="https://www.youtube.com/"><img src="../../img/reds5.png" class="logo" alt="reds5"></a>
                 <a href="https://www.instagram.com/"><img src="../../img/reds6.png" class="logo" alt="reds6"></a>
+                <a href="http://localhost:3001/MVC/index.php?c=sor" class="memorial-link">En memoria de Pedro 🕯️</a>
             </footer>
         </div>
     </div>

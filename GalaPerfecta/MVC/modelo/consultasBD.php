@@ -370,17 +370,17 @@ class TodosLosUsuarios
 }
 
 
+
 class UsuarioInsercion
 {
     private $api_url;
-
-    public function __construct($api_url)
-    {
+    private $token;
+    
+    public function __construct($api_url) {
         $this->api_url = $api_url;
     }
-
-    public function insertarUsuario($nombre, $apellido, $correo, $numero_telefono, $password): void
-    {
+    
+    public function insertarUsuario($nombre, $apellido, $correo, $numero_telefono, $password): void {
         try {
             $this->insertarViaAPI($nombre, $apellido, $correo, $numero_telefono, $password);
             echo "";
@@ -388,9 +388,8 @@ class UsuarioInsercion
             echo "Error: " . $e->getMessage();
         }
     }
-
-    private function insertarViaAPI($nombre, $apellido, $correo, $numero_telefono, $password): void
-    {
+    
+    private function insertarViaAPI($nombre, $apellido, $correo, $numero_telefono, $password): void {
         // Preparar los datos para enviar a la API
         $data = [
             'nombre' => $nombre,
@@ -400,26 +399,26 @@ class UsuarioInsercion
             'password' => $password,
             'id_tipo_user' => 1
         ];
-
+        
         // Inicializar cURL
         $ch = curl_init($this->api_url . '/usuarios');
-
+        
         // Configurar la solicitud cURL
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-
+           
         ]);
-
+        
         // Ejecutar la solicitud
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
+        
         // Cerrar la conexión cURL
         curl_close($ch);
-
+        
         // Verificar la respuesta
         if ($http_code >= 400) {
             $error = json_decode($response, true);

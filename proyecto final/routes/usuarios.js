@@ -137,24 +137,24 @@ router.get('/usuarios/:id', verificarToken, (req, res) => {
  *       500:
  *         description: Error del servidor
  */
-router.post('/usuarios', (req, res) => {
-    const { nombre, apellido, correo, numero_telefono, password, id_tipo_user } = req.body;
-    
-    if (!nombre || !apellido || !correo || !numero_telefono || !password || !id_tipo_user) {
-        return res.status(400).json({ error: "Todos los campos son obligatorios" });
-    }
-
-    connection.query(
-        'INSERT INTO usuarios (nombre, apellido, correo, numero_telefono, password, id_tipo_user) VALUES (?, ?, ?, ?, ?, ?)',
-        [nombre, apellido, correo, numero_telefono, password, id_tipo_user],
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ error: err.message });
-            }
-            res.json({ message: 'Usuario agregado correctamente', id: results.insertId });
+    router.post('/usuarios', (req, res) => {
+        const { nombre, apellido, correo, numero_telefono, password, id_tipo_user } = req.body;
+        
+        if (!nombre || !apellido || !correo || !numero_telefono || !password || !id_tipo_user) {
+            return res.status(400).json({ error: "Todos los campos son obligatorios" });
         }
-    );
-});
+
+        connection. query(
+            'INSERT INTO usuarios (nombre, apellido, correo, numero_telefono, password, id_tipo_user) VALUES (?, ?, ?, ?, ?, ?)',
+            [nombre, apellido, correo, numero_telefono, password, id_tipo_user],
+            (err, results) => {
+                if (err) {
+                    return res.status(500).json({ error: err.message });
+                }
+                res.json({ message: 'Usuario agregado correctamente', id: results.insertId });
+            }
+        );
+    });
 
 /**
  * @swagger
