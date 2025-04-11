@@ -264,10 +264,72 @@ router.delete('/eventos/:id', verificarToken, (req, res) => {
     });
 });
 
-
-// En tu archivo de rutas del servidor Node.js (por ejemplo, routes/eventos.js)
-
-// Endpoint para obtener el nombre de un evento por ID
+/**
+ * @swagger
+ * /evento/nombre/{id}:
+ *   get:
+ *     summary: Obtener el nombre de un evento por ID
+ *     tags: [Eventos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del evento a consultar
+ *     responses:
+ *       200:
+ *         description: Nombre del evento encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: false
+ *                 nombre_evento:
+ *                   type: string
+ *                   example: "Boda Elegante"
+ *       404:
+ *         description: Evento no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Evento no encontrado"
+ *       401:
+ *         description: No autorizado, token no proporcionado o inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Token no proporcionado"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
 router.get('/evento/nombre/:id', verificarToken, (req, res) => {
     try {
         const eventoId = req.params.id;

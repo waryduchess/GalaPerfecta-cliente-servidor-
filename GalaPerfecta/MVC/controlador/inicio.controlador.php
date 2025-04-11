@@ -199,15 +199,15 @@ class inicioControladorCargaLogin
     }
 }
 
+
 class inicioControladorUsuario
 {
     private $insercionUsuario;
     public $insertada;
-    public $apiUrl ="http://localhost:3002/";
-
-    //"http://localhost:3306/";
-     //APIConnection::getInstance();
+    public $apiUrl = "http://localhost:3002"; // Asigna la URL correcta de tu API
+    
     public function __construct() {
+        // Usa $this->apiUrl en lugar de $apiURl (que no está definido)
         $this->insercionUsuario = new UsuarioInsercion($this->apiUrl);
     }
     
@@ -243,6 +243,7 @@ class inicioControladorUsuario
         require_once "vista/validacionRegistro.php";
     }
 }
+
 
 class inicioControladorAdmin
 {

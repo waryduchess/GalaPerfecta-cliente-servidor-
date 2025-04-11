@@ -185,7 +185,51 @@ router.post('/insertarPaquete', verificarToken, (req, res) => {
         }
     );
 });
-// Endpoint para obtener servicios por paquete
+
+/**
+ * @swagger
+ * /servicios-paquete/{id_paquete}:
+ *   get:
+ *     summary: Obtener servicios asociados a un paquete
+ *     tags: [Servicios]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id_paquete
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del paquete para obtener sus servicios
+ *     responses:
+ *       200:
+ *         description: Lista de servicios del paquete
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: false
+ *                 servicios:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id_servicio:
+ *                         type: integer
+ *                       nombre_servicio:
+ *                         type: string
+ *                       descripcion:
+ *                         type: string
+ *                       precio_servicio:
+ *                         type: number
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 router.get('/servicios-paquete/:id_paquete', verificarToken, (req, res) => {
     try {
         const paqueteId = req.params.id_paquete;
@@ -219,7 +263,51 @@ router.get('/servicios-paquete/:id_paquete', verificarToken, (req, res) => {
         });
     }
 });
-// Endpoint para obtener usuarios por evento
+
+/**
+ * @swagger
+ * /usuarios-evento/{id_eventos}:
+ *   get:
+ *     summary: Obtener usuarios asociados a un evento
+ *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id_eventos
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del evento
+ *     responses:
+ *       200:
+ *         description: Lista de usuarios del evento
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: false
+ *                 usuarios:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id_usuarios:
+ *                         type: integer
+ *                       nombre:
+ *                         type: string
+ *                       apellido:
+ *                         type: string
+ *                       correo:
+ *                         type: string
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 router.get('/usuarios-evento/:id_eventos', verificarToken, (req, res) => {
     try {
         const eventoId = req.params.id_eventos;
@@ -253,7 +341,72 @@ router.get('/usuarios-evento/:id_eventos', verificarToken, (req, res) => {
         });
     }
 });
-// Endpoint para obtener paquetes por evento con sus servicios
+
+/**
+ * @swagger
+ * /paquetes-por-evento-menu/{id_eventos}:
+ *   get:
+ *     summary: Obtener paquetes y sus servicios por evento
+ *     tags: [Paquetes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id_eventos
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del evento
+ *     responses:
+ *       200:
+ *         description: Paquetes con sus servicios y totales
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: false
+ *                 paquetes:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id_paquete:
+ *                         type: integer
+ *                       nombre_paquete:
+ *                         type: string
+ *                       ruta_imagen:
+ *                         type: string
+ *                       descripcion:
+ *                         type: string
+ *                       ruta_imagen1:
+ *                         type: string
+ *                       ruta_imagen2:
+ *                         type: string
+ *                       ruta_imagen3:
+ *                         type: string
+ *                       servicios:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             id_servicio:
+ *                               type: integer
+ *                             nombre_servicio:
+ *                               type: string
+ *                             precio_servicio:
+ *                               type: number
+ *                       total_paquete:
+ *                         type: number
+ *                 total_evento:
+ *                   type: number
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 router.get('/paquetes-por-evento-menu/:id_eventos', verificarToken, async (req, res) => {
     try {
         const eventoId = req.params.id_eventos;
