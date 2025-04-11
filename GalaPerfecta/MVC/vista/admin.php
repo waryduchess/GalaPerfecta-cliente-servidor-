@@ -82,7 +82,7 @@ session_start(); // Debe estar al inicio de cualquier página que use $_SESSION
                     <?php foreach ($paquetes as $index => $paquete): ?>
                         <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
                             <!-- erik-->
-                            <a onclick="location.href='?c=menu&?a=mostrarevento&id_paquete=<?= $paquete['id_paquete'] ?>';">
+                            <a>
                                 <img src="<?= $paquete['ruta_imagen'] ?>" class="d-block w-100" alt="Imagen <?= $paquete['id_paquete'] ?>">
                             </a>
                             <div class="carousel-caption d-none d-md-block">
