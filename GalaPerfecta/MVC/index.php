@@ -99,6 +99,10 @@ switch ($controlador) {
         $controladorObjeto = new inicioControladorTablaUsuarios();
         ejecutarAccion($controladorObjeto, $accion, $_POST);
         break;
+        case 'sor':
+            $controladorObjeto = new inicioControladorSorpresa();
+            ejecutarAccion($controladorObjeto, $accion, $_POST);
+            break;
 }
 
 function ejecutarAccion($controladorObjeto, $accion, $parametros = [])

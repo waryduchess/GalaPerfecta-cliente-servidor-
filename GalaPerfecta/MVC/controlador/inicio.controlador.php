@@ -198,7 +198,19 @@ class inicioControladorCargaLogin
         require_once "vista/validacionLogin.php";
     }
 }
+class inicioControladorSorpresa
+{
+    private $modelo;
 
+    public function __construct()
+    {
+    }
+
+    public function inicio()
+    {
+        require_once "vista/suerte.php";
+    }
+}
 
 class inicioControladorUsuario
 {
