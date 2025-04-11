@@ -1420,7 +1420,7 @@ class cotizacionInsercion
 
     public function __construct()
     {
-        // URL base de la API
+        // URL b    ase de la API
         $this->apiBaseUrl = "http://localhost:3002"; // Cambia el puerto si es necesario
     }
 

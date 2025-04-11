@@ -78,10 +78,14 @@
 
                             if (!empty($servicios)) {
                                 foreach ($servicios as $servicio) {
-                                    echo "<label><input type='checkbox' name='servicios[]' value='{$servicio['id_servicio']}'> {$servicio['nombre_servicio']}</label>";
+                                    echo "<label class='service-item'>";
+                                    echo "<input type='checkbox' 
+                                                name='servicios[]' 
+                                                value='{$servicio['id_servicio']}'
+                                                data-precio='{$servicio['precio_servicio']}'>"; // Aquí el cambio importante
+                                    echo " {$servicio['nombre_servicio']} - \$" . number_format($servicio['precio_servicio'], 2);
+                                    echo "</label>";
                                 }
-                            } else {
-                                echo "<p>No hay servicios disponibles.</p>";
                             }
                             ?>
                         </div>
