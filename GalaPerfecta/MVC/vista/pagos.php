@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="input_container mb-4">
                     <label for="expiry-cvv" class="input_label">Fecha de Vencimiento / CVV</label>
                     <div class="split d-flex gap-3">
-                        <input id="expiry-date" name="fechaVencimiento" class="form-control" type="text" placeholder="MM/AA" required>
+                        <input id="expiry-date" name="fechaVencimiento" class="form-control" type="text" placeholder="MM/AAAA" required>
                         <input id="cvv" name="cvv" class="form-control" type="text" placeholder="CVV" required>
                     </div>
                 </div>

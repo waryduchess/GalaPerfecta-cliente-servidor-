@@ -222,8 +222,8 @@ CREATE TABLE IF NOT EXISTS `tarjetas` (
   `id_tarjeta` int NOT NULL AUTO_INCREMENT,
   `id_usuarios` int UNSIGNED NOT NULL,
   `nombre_titular` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `numero_tarjeta` int NOT NULL,
-  `fecha_vencimiento` date NOT NULL,
+  `numero_tarjeta` varchar(16) NOT NULL,
+  `fecha_vencimiento` VARCHAR(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;,
   `cvv` char(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id_tarjeta`),
   KEY `id_usuarios` (`id_usuarios`)

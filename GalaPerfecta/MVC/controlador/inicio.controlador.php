@@ -479,6 +479,20 @@ class mandarAPlazos
         require_once "vista/pagosPlazos.php";
     }
 }
+class mandaraTipoPago
+{
+    private $modelo;
+
+    public function __construct()
+    {
+    }
+
+    public function inicio()
+    {
+        require_once "vista/seleccionTipoPago.php"; 
+    }
+}
+
 class ControladorTarjeta {
     private $tarjeta;
 
@@ -505,7 +519,7 @@ class ControladorTarjeta {
     }
     public function inicio()
     {
-        require_once "vista/seleccionTipoPago.php";
+        require_once "vista/confirmacionTarjeta.php";   
     }
 }
 class ProcesarPagoContado {

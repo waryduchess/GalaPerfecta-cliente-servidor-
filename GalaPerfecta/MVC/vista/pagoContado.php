@@ -105,8 +105,218 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../css/pagosForm.css">
     <title>Eventos y Paquetes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Georgia&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+        }
+
+        .parent {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: auto auto auto auto auto auto;
+            grid-column-gap: 0px;
+            grid-row-gap: 0px;
+            min-height: 100vh;
+        }
+
+        .div1 {
+            grid-area: 1 / 1 / 2 / 13;
+            background-color: #ddc3a7;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .div2 {
+            grid-area: 2 / 1 / 3 / 13;
+            background-color: #18213b;
+            padding: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .div3 {
+            grid-area: 3 / 1 / 4 / 13;
+            padding: 20px;
+            background-color: white;
+        }
+
+        .div4 {
+            grid-area: 4 / 1 / 5 / 13;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .div5 {
+            grid-area: 5 / 1 / 6 / 13;
+            padding: 20px;
+            background-color: white;
+        }
+
+        .div6 {
+            grid-area: 6 / 1 / 7 / 13;
+            background-color: #18213b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .presentacion {
+            text-align: center;
+            font-family: 'Georgia', serif;
+            color: #18213b;
+            font-weight: bold;
+        }
+
+        h1 {
+            font-family: 'Georgia', serif;
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-family: 'Georgia', serif;
+            text-align: center;
+            color: #18213b;
+            margin-bottom: 15px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #18213b;
+        }
+
+        select, input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddc3a7;
+            border-radius: 6px;
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+        }
+
+        select:focus, input[type="date"]:focus {
+            outline: none;
+            border-color: #18213b;
+            box-shadow: 0 0 0 2px rgba(24, 33, 59, 0.2);
+        }
+
+        button {
+            background-color: #18213b;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #111a2f;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+
+        .alert-success {
+            background-color: rgba(221, 195, 167, 0.2);
+            color: #18213b;
+            border-left: 4px solid #ddc3a7;
+        }
+
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border-left: 4px solid #dc3545;
+        }
+
+        .panel-titulo {
+            background-color: #ddc3a7;
+            color: #18213b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        #monto_total {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: rgba(24, 33, 59, 0.1);
+            border-radius: 6px;
+            text-align: center;
+            color: #18213b;
+        }
+
+        #plazos_detalles {
+            display: none;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #ddc3a7;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn-regresar {
+            background-color: #ddc3a7;
+            color: #18213b;
+        }
+
+        .btn-regresar:hover {
+            background-color: #c9ae92;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
     <script>
         function calcularMontoPlazo() {
             var montoTotal = parseFloat(document.getElementById('monto_total').innerText.replace('Monto Total del Paquete: $', ''));
@@ -122,77 +332,131 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
-    <h1>Eventos y Paquetes</h1>
+    <div class="parent">
+        <div class="div1">
+            <div class="presentacion">GESTIÓN DE EVENTOS Y PAQUETES</div>
+        </div>
+        
+        <div class="div2">
+            <h1>Selección de Eventos y Paquetes</h1>
+        </div>
+        
+        <div class="div3">
+            <div class="container">
+                <!-- Mostrar mensaje -->
+                <?php if (!empty($mensaje)): ?>
+                    <div class="alert <?= strpos($mensaje, 'Error') !== false ? 'alert-danger' : 'alert-success' ?>">
+                        <?= htmlspecialchars($mensaje); ?>
+                        <?php if (isset($resultado['idPago'])): ?>
+                            <br>ID del Pago: <?= htmlspecialchars($resultado['idPago']); ?>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
 
-    <!-- Mostrar mensaje -->
-    <?php if (!empty($mensaje)): ?>
-        <div class="alert <?= strpos($mensaje, 'Error') !== false ? 'alert-danger' : 'alert-success' ?>">
-            <?= htmlspecialchars($mensaje); ?>
-            <?php if (isset($resultado['idPago'])): ?>
-                <br>ID del Pago: <?= htmlspecialchars($resultado['idPago']); ?>
+                <!-- Formulario para seleccionar evento -->
+                <div class="panel-titulo">SELECCIÓN DE EVENTO</div>
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="id_evento">Evento:</label>
+                        <select name="id_evento" id="id_evento" required>
+                            <option value="">-- Seleccionar --</option>
+                            <?php foreach ($eventos as $evento): ?>
+                                <option value="<?= $evento['id_eventos']; ?>"
+                                    <?= $eventoSeleccionado == $evento['id_eventos'] ? 'selected' : ''; ?>>
+                                    <?= htmlspecialchars($evento['nombre_evento']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <a href="http://localhost:3001/MVC/index.php?c=mandarTipoPago" class="btn-regresar" style="text-decoration: none; padding: 12px 20px; border-radius: 30px; display: inline-block;">Regresar</a>
+                        <button type="submit" name="ver_paquetes">Ver Paquetes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Formulario para seleccionar paquete -->
+        <div class="div4">
+            <?php if (!empty($paquetes)): ?>
+                <div class="container">
+                    <div class="panel-titulo">SELECCIÓN DE PAQUETE</div>
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="id_paquete">Paquete Disponible:</label>
+                            <select name="id_paquete" id="id_paquete" required>
+                                <option value="">-- Seleccionar --</option>
+                                <?php foreach ($paquetes as $paquete): ?>
+                                    <option value="<?= $paquete['id_paquete']; ?>"
+                                        <?= $paqueteSeleccionado == $paquete['id_paquete'] ? 'selected' : ''; ?>>
+                                        <?= htmlspecialchars($paquete['nombre_paquete']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <!-- Mantener el ID del evento seleccionado para la próxima solicitud -->
+                        <input type="hidden" name="id_evento" value="<?= htmlspecialchars($eventoSeleccionado); ?>">
+                        <div class="form-actions">
+                            <a href="http://localhost:3001/MVC/index.php?c=mandarTipoPago" class="btn-regresar" style="text-decoration: none; padding: 12px 20px; border-radius: 30px; display: inline-block;">Regresar</a>
+                            <button type="submit" name="seleccionar_paquete">Seleccionar Paquete</button>
+                        </div>
+                    </form>
+                </div>
             <?php endif; ?>
         </div>
-    <?php endif; ?>
+        
+        <!-- Formulario para registrar pago -->
+        <div class="div5">
+            <?php if (!empty($paqueteSeleccionado)): ?>
+                <div class="container">
+                    <div class="panel-titulo">REGISTRO DE PAGO</div>
+                    <form method="POST">
+                        <input type="hidden" name="id_evento" value="<?= htmlspecialchars($eventoSeleccionado); ?>">
+                        <input type="hidden" name="id_paquete" value="<?= htmlspecialchars($paqueteSeleccionado); ?>">
+                        <input type="hidden" name="id_usuarios" value="<?= htmlspecialchars($idUsuarioREAL); ?>">
 
-    <!-- Formulario para seleccionar evento -->
-    <form method="POST">
-        <label for="id_evento">Evento:</label>
-        <select name="id_evento" id="id_evento" required>
-            <option value="">-- Seleccionar --</option>
-            <?php foreach ($eventos as $evento): ?>
-                <option value="<?= $evento['id_eventos']; ?>"
-                    <?= $eventoSeleccionado == $evento['id_eventos'] ? 'selected' : ''; ?>>
-                    <?= htmlspecialchars($evento['nombre_evento']); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-        <button type="submit" name="ver_paquetes">Ver Paquetes</button>
-    </form>
+                        <!-- Mostrar el monto total -->
+                        <div id="monto_total">
+                            Monto Total del Paquete: $<?= number_format($controlador->obtenerTotalServiciosPorEvento($paqueteSeleccionado), 2); ?>
+                        </div>
 
-    <!-- Formulario para seleccionar paquete -->
-    <?php if (!empty($paquetes)): ?>
-        <form method="POST">
-            <label for="id_paquete">Paquete Seleccionado:</label>
-            <select name="id_paquete" id="id_paquete" required>
-                <option value="">-- Seleccionar --</option>
-                <?php foreach ($paquetes as $paquete): ?>
-                    <option value="<?= $paquete['id_paquete']; ?>"
-                        <?= $paqueteSeleccionado == $paquete['id_paquete'] ? 'selected' : ''; ?>>
-                        <?= htmlspecialchars($paquete['nombre_paquete']); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            <!-- Mantener el ID del evento seleccionado para la próxima solicitud -->
-            <input type="hidden" name="id_evento" value="<?= htmlspecialchars($eventoSeleccionado); ?>">
-            <button type="submit" name="seleccionar_paquete">Seleccionar Paquete</button>
-        </form>
-    <?php endif; ?>
+                        <div class="form-group">
+                            <label for="fecha_pago">Fecha de Pago:</label>
+                            <input type="date" id="fecha_pago" name="fecha_pago" required>
+                        </div>
 
-    <!-- Formulario para registrar pago -->
-    <?php if (!empty($paqueteSeleccionado)): ?>
-        <form method="POST">
-            <input type="hidden" name="id_evento" value="<?= htmlspecialchars($eventoSeleccionado); ?>">
-            <input type="hidden" name="id_paquete" value="<?= htmlspecialchars($paqueteSeleccionado); ?>">
-            <input type="hidden" name="id_usuarios" value="<?= htmlspecialchars($idUsuarioREAL); ?>">
+                        <div class="form-group">
+                            <label for="tipo_pago">Tipo de Pago:</label>
+                            <select id="tipo_pago" name="tipo_pago" required>
+                                <option value="contado">Contado</option>
+                            </select>
+                        </div>
+                        
+                        <div id="plazos_detalles">
+                            <div class="form-group">
+                                <label for="numero_plazo">Número de Plazos:</label>
+                                <input type="number" id="numero_plazo" name="numero_plazo" min="1" onchange="calcularMontoPlazo()">
+                            </div>
+                            <div class="form-group">
+                                <label for="fecha_plazo">Fecha del Primer Plazo:</label>
+                                <input type="date" id="fecha_plazo" name="fecha_plazo">
+                            </div>
+                            <div id="monto_plazo" style="margin-top: 10px; font-weight: bold;"></div>
+                        </div>
 
-            <!-- Mostrar el monto total -->
-            <p id="monto_total">
-                <strong>Monto Total del Paquete: $</strong>
-                <?= number_format($controlador->obtenerTotalServiciosPorEvento($paqueteSeleccionado), 2); ?>
-            </p>
-
-            <label for="fecha_pago">Fecha de Pago:</label>
-            <input type="date" id="fecha_pago" name="fecha_pago" required><br><br>
-
-            <label for="tipo_pago">Tipo de Pago:</label>
-            <select id="tipo_pago" name="tipo_pago" required>
-                <option value="contado">Contado</option>
-                <option value="plazos">Plazos</option>
-            </select><br><br>
-
-            <button type="submit">Registrar Pago</button>
-        </form>
-    <?php endif; ?>
+                        <div class="form-actions">
+                            <a href="http://localhost:3001/MVC/index.php?c=mandarTipoPago" class="btn-regresar" style="text-decoration: none; padding: 12px 20px; border-radius: 30px; display: inline-block;">Regresar</a>
+                            <button type="submit">Registrar Pago</button>
+                        </div>
+                    </form>
+                </div>
+            <?php endif; ?>
+        </div>
+        
+        <div class="div6">
+            <p>Sistema de Gestión de Eventos © 2025</p>
+        </div>
+    </div>
 
     <script>
         document.getElementById('tipo_pago').addEventListener('change', function() {

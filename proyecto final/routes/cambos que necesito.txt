@@ -1,0 +1,7 @@
+Primero eliminen todas las tarjetas que tengan guardadas 
+ALTER TABLE `tarjetas` MODIFY `fecha_vencimiento` VARCHAR(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL; 
+
+
+luego podrias cambiar esto 
+ALTER TABLE tarjetas
+MODIFY COLUMN numero_tarjeta VARCHAR(16) NOT NULL;

@@ -83,6 +83,10 @@ switch ($controlador) {
         $controladorObjeto = new ControladorTarjeta();
         ejecutarAccion($controladorObjeto, $accion, $_POST);
         break;
+    case 'mandarTipoPago':
+        $controladorObjeto = new mandaraTipoPago();
+        ejecutarAccion($controladorObjeto, $accion, $_POST);
+        break;
     case 'contado':
         $controladorObjeto = new mandarAContado();
         ejecutarAccion($controladorObjeto, $accion, $_POST);
