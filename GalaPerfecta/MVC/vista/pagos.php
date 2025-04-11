@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <!-- Botones -->
                 <div class="d-flex justify-content-between">
                     <button type="submit" class="btn btn-primary">Confirmar</button>
-                    <button type="button" class="btn btn-secondary" onclick="location.href='?c=cotizacion';">Regresar</button>
+                    <button type="button" class="btn btn-secondary" onclick="location.href='?c=principalCliente';">Regresar</button>
                 </div>
             </div>
         </form>
