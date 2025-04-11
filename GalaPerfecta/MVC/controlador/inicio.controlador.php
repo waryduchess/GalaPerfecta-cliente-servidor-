@@ -4,9 +4,6 @@
 require_once "modelo/conexionBD.php";
 require_once "modelo/consultasBD.php";
 
-
-
-
 class inicioControlador
 {
     private $modelo;
@@ -670,11 +667,50 @@ class inicioControladorTablaUsuarios
     }
 }
 
+class PagosControlador {
+    private $modelo;
+    
+    public function __construct() {
+        $this->modelo = new PagosModelo();
+    }
+    
+    public function mostrarPagos() {
+        try {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
 
+            // Verificar si el usuario está logueado
+            if (!isset($_SESSION['idUsuario']) || !isset($_SESSION['token'])) {
+                throw new Exception("Debe iniciar sesión para ver los pagos");
+            }
+            
+            $idUsuario = $_SESSION['idUsuario'];
+            $token = $_SESSION['token'];
+            
+            // Obtener los pagos desde el modelo
+            $resultado = $this->modelo->obtenerPagosUsuario($idUsuario, $token);
+            
+            if ($resultado['error']) {
+                throw new Exception($resultado['mensaje']);
+            }
+            
+            // Guardar datos para la vista
+            $_SESSION['pagos'] = $resultado['pagos'];
+            $_SESSION['mensaje'] = null;
+            
+            return $resultado['pagos'];
 
+        } catch (Exception $e) {
+            $_SESSION['mensaje'] = $e->getMessage();
+            $_SESSION['pagos'] = [];
+            return [];
+        }
+    }
 
-
-
-
+    public function inicio() {
+        require_once "vista/historialpago.php";
+    }
+}
 
 ?>

@@ -1507,3 +1507,67 @@ class cotizacionInsercion
         }
     }
 }
+
+class PagosModelo {
+    private const API_TIMEOUT = 30;
+    private const ENDPOINT_PAGOS = '/pagos/usuario/';
+    private $apiBaseUrl;
+
+    public function __construct() {
+        $this->apiBaseUrl = "http://localhost:3002";
+    }
+
+    public function obtenerPagosUsuario($idUsuario, $token) {
+        try {
+            // Validaciones
+            if (!$idUsuario || !is_numeric($idUsuario)) {
+                throw new Exception("ID de usuario inválido");
+            }
+            if (!$token) {
+                throw new Exception("Token no proporcionado");
+            }
+
+            // Configurar cURL
+            $ch = curl_init($this->apiBaseUrl . self::ENDPOINT_PAGOS . $idUsuario);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => self::API_TIMEOUT,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $token
+                ]
+            ]);
+
+            // Ejecutar petición
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            curl_close($ch);
+
+            // Procesar respuesta
+            $responseData = json_decode($response, true);
+
+            if ($httpCode === 200) {
+                if (!isset($responseData['pagos']) || !is_array($responseData['pagos'])) {
+                    throw new Exception("Formato de respuesta inválido");
+                }
+                return [
+                    'error' => false,
+                    'pagos' => $responseData['pagos']
+                ];
+            }
+
+            throw new Exception($responseData['mensaje'] ?? "Error al obtener los pagos");
+
+        } catch (Exception $e) {
+            return [
+                'error' => true,
+                'mensaje' => $e->getMessage()
+            ];
+        }
+    }
+}
