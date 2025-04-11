@@ -14,7 +14,7 @@
     <nav class="navbar navbar-expand-lg navbar-light navbar-custom fixed-top">
         <h1 class="centrar">
             <img src="../../img/logo1.png" class="logo" alt="logo1">
-            <a href="index.php" class="logo"><strong>Gala Perfecta</strong></a>
+            <a href="index.php?c=principalCliente" class="logo"><strong>Gala Perfecta</strong></a>
         </h1>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -31,7 +31,7 @@
                 <h2>Cotización</h2><br>
                 <form id="cotizacionForm">
                     <div class="input-box">
-                        <label for="nombre_evento">Selecciona el evento:</label>
+                        <label for="nombre_evento"></label>
                         <select name="nombre_evento" id="nombre_evento" required>
                             <option value="" disabled selected>Selecciona un evento</option>
                             <?php
@@ -92,7 +92,7 @@
                     <button type="button" onclick="mostrarCotizacion()" class="btn btn-secondary">Cotizar</button>
                     <button type="button" onclick="history.back()" class="btn btn-secondary">Regresar</button>
 
-                    <button type="button" onclick="location.href='?c=pagos';" class="btn btn-secondary">Pagar</button>
+                    
                 </form>
 
             </div>
