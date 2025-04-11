@@ -454,7 +454,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         
         <div class="div6">
-            <p>Sistema de Gestión de Eventos © 2025</p>
+            <p>Gala perfecta © 2025</p>
         </div>
     </div>
 

@@ -430,16 +430,15 @@ class UsuarioInsercion
 //Esta Aun no queda EVENTO ES LA QUE SE ME DIFICULTA
 class Evento
 {
-    private $conn;
+    
     private $evento_id;
     public $nombre_evento;
     public $paquetes = [];
     public $usuarios = [];
     public $total_evento = 0; // Total general de todos los paquetes
-
-    public function __construct($conn, $evento_id)
+    private $apiBaseUrl = "http://localhost:3002"; // Cambiado a un puerto típico para Node.js
+    public function __construct( $evento_id)
     {
-        $this->conn = $conn;
         $this->evento_id = $evento_id;
         $this->cargarDatos();
     }
@@ -454,80 +453,174 @@ class Evento
             throw new Exception("Error al cargar los datos del evento: " . $e->getMessage());
         }
     }
-
+//ya esta esta funcion
     private function obtenerNombreEvento()
     {
-        $sql = "SELECT nombre_evento FROM eventos WHERE id_eventos = :id_eventos";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':id_eventos', $this->evento_id, PDO::PARAM_INT); // Asociar el valor usando PDO
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['nombre_evento'] ?? 'Nombre del evento no encontrado';
+        try {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+
+            $token = $_SESSION['token'];
+            
+            // Construir la URL del endpoint
+            $url = $this->apiBaseUrl . "/evento/nombre/" . $this->evento_id;
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            // Configurar cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token
+            ]);
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            // Cerrar la conexión cURL
+            curl_close($ch);
+
+            // Verificar el código de respuesta HTTP
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $data = json_decode($response, true);
+                return $data['nombre_evento'] ?? 'Nombre del evento no encontrado';
+            } else {
+                $errorData = json_decode($response, true);
+                throw new Exception($errorData['mensaje'] ?? "Error del servidor (Código HTTP: $httpCode)");
+            }
+        } catch (Exception $e) {
+            return 'Error al obtener el nombre del evento: ' . $e->getMessage();
+        }
     }
 
 
     private function obtenerPaquetes()
     {
-        $sql = "SELECT id_paquete, nombre_paquete, ruta_imagen, descripcion, ruta_imagen1, ruta_imagen2, ruta_imagen3 
-                FROM paquetes WHERE id_eventos = :id_eventos";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':id_eventos', $this->evento_id, PDO::PARAM_INT);
-        $stmt->execute();
-        $paquetes = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $servicios = $this->obtenerServicios($row['id_paquete']);
-            $total_paquete = $this->calcularTotalServicios($servicios);
-            $paquetes[] = [
-                'id_paquete' => $row['id_paquete'],
-                'nombre_paquete' => $row['nombre_paquete'],
-                'ruta_imagen' => $row['ruta_imagen'],
-                'descripcion' => $row['descripcion'],
-                'servicios' => $servicios,
-                'ruta_imagen1' => $row['ruta_imagen1'],
-                'ruta_imagen2' => $row['ruta_imagen2'],
-                'ruta_imagen3' => $row['ruta_imagen3'],
-                'total_paquete' => $total_paquete,
-            ];
-            $this->total_evento += $total_paquete;
-        }
-        return $paquetes;
-    }
-    //ERRRRRIUBHBDHBDZBDBY    
+        try {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
 
-    private function obtenerServicios($paquete_id)
-    {
-        $sql = "SELECT s.id_servicio, s.nombre_servicio, s.descripcion, s.precio_servicio 
-                FROM servicios s
-                INNER JOIN paquete_servicio ps ON s.id_servicio = ps.id_servicio
-                WHERE ps.id_paquete = :id_paquete";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':id_paquete', $paquete_id, PDO::PARAM_INT);
-        $stmt->execute();
-        $servicios = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $servicios[] = $row;
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+
+            $token = $_SESSION['token'];
+            
+            // Construir la URL del endpoint
+            $url = $this->apiBaseUrl . "/paquetes-por-evento-menu/" . $this->evento_id;
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            // Configurar cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token
+            ]);
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            // Cerrar la conexión cURL
+            curl_close($ch);
+
+            // Verificar el código de respuesta HTTP
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $data = json_decode($response, true);
+                
+                if (isset($data['paquetes'])) {
+                    $this->total_evento = $data['total_evento'];
+                    return $data['paquetes'];
+                } else {
+                    throw new Exception("Respuesta del servidor no válida");
+                }
+            } else {
+                $errorData = json_decode($response, true);
+                throw new Exception($errorData['mensaje'] ?? "Error del servidor (Código HTTP: $httpCode)");
+            }
+        } catch (Exception $e) {
+            error_log("Error al obtener paquetes: " . $e->getMessage());
+            return [];
         }
-        return $servicios;
     }
 
 
     private function obtenerUsuarios()
     {
-        $sql = "SELECT u.id_usuarios, u.nombre, u.apellido, u.correo 
-                FROM usuarios u
-                INNER JOIN paquetes p ON u.id_usuarios = p.id_usuarios
-                WHERE p.id_eventos = :id_eventos";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':id_eventos', $this->evento_id, PDO::PARAM_INT);
-        $stmt->execute();
-        $usuarios = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $usuarios[] = $row;
+        try {
+            // Verificar si el token está disponible en la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+
+            $token = $_SESSION['token'];
+            
+            // Construir la URL del endpoint
+            $url = $this->apiBaseUrl . "/usuarios-evento/" . $this->evento_id;
+
+            // Inicializar cURL
+            $ch = curl_init($url);
+
+            // Configurar cURL
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token
+            ]);
+
+            // Ejecutar la solicitud
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            // Manejo de errores de cURL
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            // Cerrar la conexión cURL
+            curl_close($ch);
+
+            // Verificar el código de respuesta HTTP
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $data = json_decode($response, true);
+                return $data['usuarios'] ?? [];
+            } else {
+                $errorData = json_decode($response, true);
+                throw new Exception($errorData['mensaje'] ?? "Error del servidor (Código HTTP: $httpCode)");
+            }
+        } catch (Exception $e) {
+            error_log("Error al obtener usuarios del evento: " . $e->getMessage());
+            return [];
         }
-        return $usuarios;
     }
 
-
+/*
     private function calcularTotalServicios($servicios)
     {
         $total = 0;
@@ -536,21 +629,20 @@ class Evento
         }
         return $total;
     }
+    */
 }
 //Igual aun no esta listo es muy dificl;
 class NuestrosEventos
 {
-    private $db;
-
+    
     public function __construct()
     {
-        $this->db = baseDatos::conectarBD();
     }
 
     public function obtenerEvento($evento_id)
     {
         try {
-            $evento = new Evento($this->db, $evento_id);
+            $evento = new Evento( $evento_id);
             if (empty($evento->nombre_evento)) {
                 throw new Exception("Evento no encontrado.");
             }
@@ -1113,8 +1205,7 @@ class Tarjeta
 
 class Pagos
 {
-    private $db;
-
+   
     private $apiBaseUrl;
 
     public function __construct()
@@ -1195,49 +1286,6 @@ class Pagos
         }
     }
 
-    // Método para registrar un pago a plazos
-    public function registrarPagoPlazos($idUsuarios, $idPaquete, $montoTotal, $fechaPago, $plazos)
-    {
-        try {
-            $this->db->beginTransaction();
-
-            // Registrar el pago principal
-            $tipoPago = 'plazos';
-            $queryPago = "INSERT INTO pagos (id_usuarios, id_paquete, monto_total, tipo_pago, fecha_pago) 
-                          VALUES (:id_usuarios, :id_paquete, :monto_total, :tipo_pago, :fecha_pago)";
-            $stmtPago = $this->db->prepare($queryPago);
-
-            $stmtPago->bindParam(':id_usuarios', $idUsuarios);
-            $stmtPago->bindParam(':id_paquete', $idPaquete);
-            $stmtPago->bindParam(':monto_total', $montoTotal);
-            $stmtPago->bindParam(':tipo_pago', $tipoPago);
-            $stmtPago->bindParam(':fecha_pago', $fechaPago);
-
-            $stmtPago->execute();
-            $idPago = $this->db->lastInsertId();
-
-            // Registrar los plazos
-            $queryPlazo = "INSERT INTO pagos_plazos (id_pago, numero_plazo, monto_plazo, fecha_pago, estado_pago) 
-                           VALUES (:id_pago, :numero_plazo, :monto_plazo, :fecha_pago, :estado_pago)";
-            $stmtPlazo = $this->db->prepare($queryPlazo);
-
-            foreach ($plazos as $plazo) {
-                $stmtPlazo->bindParam(':id_pago', $idPago);
-                $stmtPlazo->bindParam(':numero_plazo', $plazo['numero_plazo']);
-                $stmtPlazo->bindParam(':monto_plazo', $plazo['monto_plazo']);
-                $stmtPlazo->bindParam(':fecha_pago', $plazo['fecha_pago']);
-                $stmtPlazo->bindValue(':estado_pago', 'pendiente');
-
-                $stmtPlazo->execute();
-            }
-
-            $this->db->commit();
-            return "Pago a plazos registrado exitosamente.";
-        } catch (Exception $e) {
-            $this->db->rollBack();
-            return "Error al registrar el pago a plazos: " . $e->getMessage();
-        }
-    }
 }
 //Parcialmente terminado
 class obtenerPacks

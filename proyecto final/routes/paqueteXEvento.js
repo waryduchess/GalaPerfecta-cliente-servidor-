@@ -185,5 +185,144 @@ router.post('/insertarPaquete', verificarToken, (req, res) => {
         }
     );
 });
+// Endpoint para obtener servicios por paquete
+router.get('/servicios-paquete/:id_paquete', verificarToken, (req, res) => {
+    try {
+        const paqueteId = req.params.id_paquete;
 
+        const query = `
+            SELECT s.id_servicio, s.nombre_servicio, s.descripcion, s.precio_servicio 
+            FROM servicios s
+            INNER JOIN paquete_servicio ps ON s.id_servicio = ps.id_servicio
+            WHERE ps.id_paquete = ?
+        `;
+
+        connection.query(query, [paqueteId], (error, results) => {
+            if (error) {
+                console.error('Error al obtener servicios del paquete:', error);
+                return res.status(500).json({
+                    error: true,
+                    mensaje: 'Error al obtener los servicios del paquete'
+                });
+            }
+
+            res.json({
+                error: false,
+                servicios: results
+            });
+        });
+    } catch (error) {
+        console.error('Error en el servidor:', error);
+        res.status(500).json({
+            error: true,
+            mensaje: 'Error interno del servidor'
+        });
+    }
+});
+// Endpoint para obtener usuarios por evento
+router.get('/usuarios-evento/:id_eventos', verificarToken, (req, res) => {
+    try {
+        const eventoId = req.params.id_eventos;
+
+        const query = `
+            SELECT u.id_usuarios, u.nombre, u.apellido, u.correo 
+            FROM usuarios u
+            INNER JOIN paquetes p ON u.id_usuarios = p.id_usuarios
+            WHERE p.id_eventos = ?
+        `;
+
+        connection.query(query, [eventoId], (error, results) => {
+            if (error) {
+                console.error('Error al obtener usuarios del evento:', error);
+                return res.status(500).json({
+                    error: true,
+                    mensaje: 'Error al obtener los usuarios del evento'
+                });
+            }
+
+            res.json({
+                error: false,
+                usuarios: results
+            });
+        });
+    } catch (error) {
+        console.error('Error en el servidor:', error);
+        res.status(500).json({
+            error: true,
+            mensaje: 'Error interno del servidor'
+        });
+    }
+});
+// Endpoint para obtener paquetes por evento con sus servicios
+router.get('/paquetes-por-evento-menu/:id_eventos', verificarToken, async (req, res) => {
+    try {
+        const eventoId = req.params.id_eventos;
+
+        const query = `
+            SELECT id_paquete, nombre_paquete, ruta_imagen, descripcion, 
+                   ruta_imagen1, ruta_imagen2, ruta_imagen3 
+            FROM paquetes 
+            WHERE id_eventos = ?`;
+
+        connection.query(query, [eventoId], async (error, paquetes) => {
+            if (error) {
+                console.error('Error al obtener paquetes:', error);
+                return res.status(500).json({
+                    error: true,
+                    mensaje: 'Error al obtener los paquetes'
+                });
+            }
+
+            try {
+                // Para cada paquete, obtener sus servicios y calcular el total
+                const paquetesConServicios = await Promise.all(paquetes.map(async (paquete) => {
+                    // Obtener servicios usando el endpoint existente
+                    const url = `${req.protocol}://${req.get('host')}/servicios-paquete/${paquete.id_paquete}`;
+                    const serviciosResponse = await fetch(url, {
+                        headers: { 'Authorization': req.headers.authorization }
+                    });
+                    const serviciosData = await serviciosResponse.json();
+                    const servicios = serviciosData.servicios || [];
+
+                    // Calcular total del paquete
+                    const total_paquete = servicios.reduce((total, servicio) => 
+                        total + servicio.precio_servicio, 0);
+
+                    return {
+                        id_paquete: paquete.id_paquete,
+                        nombre_paquete: paquete.nombre_paquete,
+                        ruta_imagen: paquete.ruta_imagen,
+                        descripcion: paquete.descripcion,
+                        ruta_imagen1: paquete.ruta_imagen1,
+                        ruta_imagen2: paquete.ruta_imagen2,
+                        ruta_imagen3: paquete.ruta_imagen3,
+                        servicios: servicios,
+                        total_paquete: total_paquete
+                    };
+                }));
+
+                res.json({
+                    error: false,
+                    paquetes: paquetesConServicios,
+                    total_evento: paquetesConServicios.reduce((total, paquete) => 
+                        total + paquete.total_paquete, 0)
+                });
+
+            } catch (err) {
+                console.error('Error al procesar paquetes:', err);
+                res.status(500).json({
+                    error: true,
+                    mensaje: 'Error al procesar los paquetes'
+                });
+            }
+        });
+
+    } catch (error) {
+        console.error('Error en el servidor:', error);
+        res.status(500).json({
+            error: true,
+            mensaje: 'Error interno del servidor'
+        });
+    }
+});
 module.exports = router;
