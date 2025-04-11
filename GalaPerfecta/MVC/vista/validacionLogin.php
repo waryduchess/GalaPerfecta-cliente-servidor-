@@ -21,7 +21,9 @@ if ($control->getStatus()) {
 <div class="loading-container">
     <?php if ($control->getStatus()): ?>
         <div class="loading-circle"></div>
-        <h2 class="loading-text">¡BIENVENIDO, <?= htmlspecialchars($_SESSION['nombre_usuario']) ?>, !<?= htmlspecialchars($control->getToken()) ?></h2>
+
+        <h2 class="loading-text">¡BIENVENIDO, <?= htmlspecialchars($control->getNombreUsuario()) ?></h2>
+
         <p class="loading-text">Redirigiendo a tu página...</p>
     <?php else: ?>
         <div class="loading-circle"></div>

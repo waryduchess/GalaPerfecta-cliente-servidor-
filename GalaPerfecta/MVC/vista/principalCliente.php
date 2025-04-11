@@ -29,6 +29,7 @@ session_start(); // Debe estar al inicio de cualquier página que use $_SESSION
                 <li class="nav-item">
                     <a class="nav-link" href="index.php?c=cotizacion">Cotización <span class="sr-only"></span></a>
                 </li>
+
                 <?php if (isset($_SESSION['nombre_usuario'])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -39,6 +40,14 @@ session_start(); // Debe estar al inicio de cualquier página que use $_SESSION
                         </ul>
                     </li>
                 <?php endif; ?>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php">Salir <span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php?c=historial">Historial de compra <span class="sr-only"></span></a>
+                </li>
+
             </ul>
         </div>
     </nav>
