@@ -327,4 +327,99 @@ router.delete('/usuarios/:id', verificarToken, (req, res) => {
       }
     );
 });
+/**
+ * @swagger
+ * /pagos/usuario/{id_usuario}:
+ *   get:
+ *     summary: Obtiene todos los pagos de un usuario específico
+ *     tags: [Pagos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id_usuario
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario para consultar sus pagos
+ *     responses:
+ *       200:
+ *         description: Lista de pagos del usuario obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: false
+ *                 pagos:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id_pago:
+ *                         type: integer
+ *                       id_paquete:
+ *                         type: integer
+ *                       monto_total:
+ *                         type: number
+ *                       tipo_pago:
+ *                         type: string
+ *                         enum: [contado, plazos]
+ *                       fecha_pago:
+ *                         type: string
+ *                         format: date
+ *                       nombre_paquete:
+ *                         type: string
+ *                       nombre_evento:
+ *                         type: string
+ *       404:
+ *         description: No se encontraron pagos para este usuario
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
+router.get('/pagos/usuario/:id_usuario', verificarToken, (req, res) => {
+    const { id_usuario } = req.params;
+    
+    const query = `
+        SELECT 
+            p.id_pago,
+            p.id_paquete,
+            p.monto_total,
+            p.tipo_pago,
+            DATE_FORMAT(p.fecha_pago, '%Y-%m-%d') as fecha_pago,
+            pq.nombre_paquete,
+            e.nombre_evento
+        FROM pagos p
+        LEFT JOIN paquetes pq ON p.id_paquete = pq.id_paquete
+        LEFT JOIN eventos e ON pq.id_eventos = e.id_eventos
+        WHERE p.id_usuarios = ?
+        ORDER BY p.fecha_pago DESC
+    `;
+
+    connection.query(query, [id_usuario], (error, results) => {
+        if (error) {
+            console.error('Error al consultar pagos del usuario:', error);
+            return res.status(500).json({
+                error: true,
+                mensaje: "Error al obtener los pagos del usuario"
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                error: true,
+                mensaje: "No se encontraron pagos para este usuario"
+            });
+        }
+
+        res.json({
+            error: false,
+            pagos: results
+        });
+    });
+});
 module.exports = router;
