@@ -1,5 +1,11 @@
 <?php
+session_start(); 
 require_once 'datosUsuario.php';
+if ($control->getStatus()) {
+    // Guardar datos en sesión
+    $_SESSION['nombre_usuario'] = $control->getNombreUsuario();
+    $_SESSION['tipo_usuario'] = $control->getTipoUsuario();
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -15,7 +21,9 @@ require_once 'datosUsuario.php';
 <div class="loading-container">
     <?php if ($control->getStatus()): ?>
         <div class="loading-circle"></div>
+
         <h2 class="loading-text">¡BIENVENIDO, <?= htmlspecialchars($control->getNombreUsuario()) ?></h2>
+
         <p class="loading-text">Redirigiendo a tu página...</p>
     <?php else: ?>
         <div class="loading-circle"></div>
@@ -25,19 +33,14 @@ require_once 'datosUsuario.php';
 
 <script>
     <?php if ($control->getStatus()): ?>
-        <?php if ($control->getTipoUsuario() == 2): ?>
-            setTimeout(function() {
-                window.location.href = "index.php?c=admin";
-            }, 5000);
-        <?php elseif ($control->getTipoUsuario() == 1): ?>
-            setTimeout(function() {
-                window.location.href = "index.php?c=principalCliente";
-            }, 5000);
-        <?php endif; ?>
+        // Reducción de tiempo de redirección (5 segundos es demasiado)
+        setTimeout(function() {
+            window.location.href = "<?= ($_SESSION['tipo_usuario'] == 2) ? 'index.php?c=admin' : 'index.php?c=principalCliente' ?>";
+        }, 2000); // 2 segundos es suficiente
     <?php else: ?>
         setTimeout(function() {
             window.location.href = "index.php?c=login";
-        }, 5000);
+        }, 2000);
     <?php endif; ?>
 </script>
 </body>

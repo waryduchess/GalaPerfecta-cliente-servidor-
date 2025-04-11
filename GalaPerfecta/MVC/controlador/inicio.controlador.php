@@ -208,6 +208,19 @@ class inicioControladorSorpresa
         require_once "vista/suerte.php";
     }
 }
+class inicioControladorLogout
+{
+    private $modelo;
+
+    public function __construct()
+    {
+    }
+
+    public function inicio()
+    {
+        require_once "vista/logout.php";
+    }
+}
 
 class inicioControladorUsuario
 {
