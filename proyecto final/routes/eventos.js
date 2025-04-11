@@ -264,4 +264,48 @@ router.delete('/eventos/:id', verificarToken, (req, res) => {
     });
 });
 
+
+// En tu archivo de rutas del servidor Node.js (por ejemplo, routes/eventos.js)
+
+// Endpoint para obtener el nombre de un evento por ID
+router.get('/evento/nombre/:id', verificarToken, (req, res) => {
+    try {
+        const eventoId = req.params.id;
+
+        const query = `
+            SELECT nombre_evento 
+            FROM eventos 
+            WHERE id_eventos = ?
+        `;
+
+        connection.query(query, [eventoId], (error, results) => {
+            if (error) {
+                console.error('Error al obtener el nombre del evento:', error);
+                return res.status(500).json({
+                    error: true,
+                    mensaje: 'Error al obtener el nombre del evento'
+                });
+            }
+
+            if (results.length === 0) {
+                return res.status(404).json({
+                    error: true,
+                    mensaje: 'Evento no encontrado'
+                });
+            }
+
+            res.json({
+                error: false,
+                nombre_evento: results[0].nombre_evento
+            });
+        });
+    } catch (error) {
+        console.error('Error en el servidor:', error);
+        res.status(500).json({
+            error: true,
+            mensaje: 'Error interno del servidor'
+        });
+    }
+});
+
 module.exports = router;

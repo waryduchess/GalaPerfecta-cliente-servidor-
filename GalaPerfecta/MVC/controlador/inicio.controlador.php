@@ -564,7 +564,6 @@ class ProcesarPagoPlazos {
         $plazos = $this->datos['plazos']; // Array con detalles de cada plazo
 
         // Llamar al método de la clase Pagos para registrar el pago a plazos
-        return $this->pagos->registrarPagoPlazos($idUsuarios, $idPaquete, $montoTotal, $fechaPago, $plazos);
     }
     public function inicio(){
     require_once "";
