@@ -68,9 +68,9 @@ if (!$evento) {
                     <?php endforeach; ?>
                 </ul>
                 <div class="buttons">
-                    <button class="btn primary" onclick="location.href='?c=cotizacion';">Cotizar Gratis</button>
+                    
                     <button class="btn secondary" onclick="location.href='https://web.whatsapp.com/';">Mándanos un WhatsApp</button>
-                    <button class="btn terciario" onclick="location.href='index.php';">Regresar</button>
+                    <button class="btn terciario" onclick="location.href='index.php?c=principalCliente';">Regresar</button>
                     <button class="btn btn-secondary" onclick="location.href='?c=pagos';" >Pagar</button>
                 </div>
             </div>
