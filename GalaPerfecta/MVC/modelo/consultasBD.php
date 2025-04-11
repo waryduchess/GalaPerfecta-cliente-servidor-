@@ -1005,34 +1005,112 @@ class ServicioInsercion
 
 class Tarjeta
 {
-    private $db;
+    private $apiBaseUrl;
 
     public function __construct()
     {
-        $this->db = baseDatos::conectarBD();
+        $this->apiBaseUrl = "http://localhost:3002";
+    }
+
+    /**
+     * Valida localmente los datos antes de enviarlos al servidor
+     */
+    private function validarDatos($nombreTitular, $numeroTarjeta, $fechaVencimiento, $cvv)
+    {
+        if (strlen($nombreTitular) > 100) {
+            throw new Exception('El nombre del titular no puede exceder los 100 caracteres');
+        }
+
+        if (!preg_match('/^\d{16}$/', $numeroTarjeta)) {
+            throw new Exception('El número de tarjeta debe tener exactamente 16 dígitos');
+        }
+
+        if (!preg_match('/^(0[1-9]|1[0-2])\/\d{4}$/', $fechaVencimiento)) {
+            throw new Exception('El formato de fecha debe ser MM/AAAA');
+        }
+
+        // Validar que la tarjeta no esté vencida
+        list($mes, $anio) = explode('/', $fechaVencimiento);
+        $fechaActual = new DateTime();
+        $fechaTarjeta = DateTime::createFromFormat('m/Y', $fechaVencimiento);
+        
+        if ($fechaTarjeta < $fechaActual) {
+            throw new Exception('La tarjeta está vencida');
+        }
+
+        if (!preg_match('/^\d{3}$/', $cvv)) {
+            throw new Exception('El CVV debe tener exactamente 3 dígitos');
+        }
     }
 
     public function insertar($idUsuario, $nombreTitular, $numeroTarjeta, $fechaVencimiento, $cvv)
     {
         try {
-            $sql = "INSERT INTO tarjetas (id_usuarios, nombre_titular, numero_tarjeta, fecha_vencimiento, cvv) 
-                    VALUES (:id_usuarios, :nombre_titular, :numero_tarjeta, :fecha_vencimiento, :cvv)";
-            $stmt = $this->db->prepare($sql);
+            // Validaciones locales
+            $this->validarDatos($nombreTitular, $numeroTarjeta, $fechaVencimiento, $cvv);
 
-            $stmt->bindParam(':id_usuarios', $idUsuario, PDO::PARAM_INT);
-            $stmt->bindParam(':nombre_titular', $nombreTitular, PDO::PARAM_STR);
-            $stmt->bindParam(':numero_tarjeta', $numeroTarjeta, PDO::PARAM_STR); // Puede ser INT o BIGINT en la BD
-            $stmt->bindParam(':fecha_vencimiento', $fechaVencimiento, PDO::PARAM_STR);
-            $stmt->bindParam(':cvv', $cvv, PDO::PARAM_STR);
+            // Verificar sesión y token
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
 
-            $stmt->execute();
-            return true;
-        } catch (PDOException $e) {
-            echo "Error al insertar tarjeta: " . $e->getMessage();
-            return false;
+            if (!isset($_SESSION['token'])) {
+                throw new Exception("Token no disponible. Por favor, inicie sesión.");
+            }
+
+            $token = $_SESSION['token'];
+
+            // Preparar datos para la API
+            $data = [
+                'idUsuario' => $idUsuario,
+                'nombreTitular' => $nombreTitular,
+                'numeroTarjeta' => $numeroTarjeta,
+                'fechaVencimiento' => $fechaVencimiento,
+                'cvv' => $cvv
+            ];
+
+            // Configurar y ejecutar la petición
+            $ch = curl_init($this->apiBaseUrl . "/insertar-tarjeta");
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($data),
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $token
+                ]
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                throw new Exception("Error en la conexión: " . curl_error($ch));
+            }
+
+            curl_close($ch);
+
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $responseData = json_decode($response, true);
+                return [
+                    'error' => false,
+                    'mensaje' => $responseData['mensaje'] ?? 'Tarjeta registrada exitosamente',
+                    'idTarjeta' => $responseData['idTarjeta'] ?? null
+                ];
+            } else {
+                $errorData = json_decode($response, true);
+                throw new Exception($errorData['mensaje'] ?? "Error del servidor (HTTP: $httpCode)");
+            }
+
+        } catch (Exception $e) {
+            return [
+                'error' => true,
+                'mensaje' => "Error al registrar la tarjeta: " . $e->getMessage()
+            ];
         }
     }
 }
+
 class Pagos
 {
     private $db;

@@ -112,4 +112,195 @@ router.post('/registrar-pago-contado', verificarToken, async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /insertar-tarjeta:
+ *   post:
+ *     summary: Inserta una nueva tarjeta de crédito/débito
+ *     tags: [Tarjetas]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Permite registrar una nueva tarjeta asociada a un usuario. Incluye validaciones de formato y fecha de vencimiento.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - idUsuario
+ *               - nombreTitular
+ *               - numeroTarjeta
+ *               - fechaVencimiento
+ *               - cvv
+ *             properties:
+ *               idUsuario:
+ *                 type: integer
+ *                 description: ID del usuario al que se asociará la tarjeta
+ *                 example: 1
+ *               nombreTitular:
+ *                 type: string
+ *                 maxLength: 100
+ *                 description: Nombre completo del titular de la tarjeta
+ *                 example: "Juan Pérez González"
+ *               numeroTarjeta:
+ *                 type: string
+ *                 pattern: ^\d{16}$
+ *                 description: Número de tarjeta (16 dígitos)
+ *                 example: "4111111111111111"
+ *               fechaVencimiento:
+ *                 type: string
+ *                 pattern: ^(0[1-9]|1[0-2])\/\d{4}$
+ *                 description: Fecha de vencimiento en formato MM/AAAA
+ *                 example: "12/2025"
+ *               cvv:
+ *                 type: string
+ *                 pattern: ^\d{3}$
+ *                 description: Código de seguridad (3 dígitos)
+ *                 example: "123"
+ *     responses:
+ *       201:
+ *         description: Tarjeta registrada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: false
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Tarjeta registrada exitosamente"
+ *                 idTarjeta:
+ *                   type: integer
+ *                   example: 1
+ *       400:
+ *         description: Error de validación en los datos proporcionados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: "El formato de fecha debe ser MM/AAAA"
+ *       401:
+ *         description: Token no proporcionado o inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Token no proporcionado"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
+router.post('/insertar-tarjeta', verificarToken, async (req, res) => {
+    try {
+        const { idUsuario, nombreTitular, numeroTarjeta, fechaVencimiento, cvv } = req.body;
+
+        // Validaciones mejoradas según la estructura de la tabla
+        if (!idUsuario || !nombreTitular || !numeroTarjeta || !fechaVencimiento || !cvv) {
+            return res.status(400).json({
+                error: true,
+                mensaje: 'Todos los campos son requeridos'
+            });
+        }
+
+        // Validar longitud del nombre titular (máximo 100 caracteres)
+        if (nombreTitular.length > 100) {
+            return res.status(400).json({
+                error: true,
+                mensaje: 'El nombre del titular no puede exceder los 100 caracteres'
+            });
+        }
+
+        // Validar formato de número de tarjeta (exactamente 16 dígitos)
+        if (!/^\d{16}$/.test(numeroTarjeta)) {
+            return res.status(400).json({
+                error: true,
+                mensaje: 'El número de tarjeta debe tener exactamente 16 dígitos'
+            });
+        }
+
+        // Validar formato de fecha (MM/AAAA)
+        if (!/^(0[1-9]|1[0-2])\/\d{4}$/.test(fechaVencimiento)) {
+            return res.status(400).json({
+                error: true,
+                mensaje: 'El formato de fecha debe ser MM/AAAA'
+            });
+        }
+
+        // Validación adicional para año válido (actual o futuro)
+        const [mes, anio] = fechaVencimiento.split('/');
+        const fechaActual = new Date();
+        const anioActual = fechaActual.getFullYear();
+        const mesActual = fechaActual.getMonth() + 1;
+
+        if (parseInt(anio) < anioActual || 
+            (parseInt(anio) === anioActual && parseInt(mes) < mesActual)) {
+            return res.status(400).json({
+                error: true,
+                mensaje: 'La tarjeta está vencida'
+            });
+        }
+
+        // Validar CVV (exactamente 3 dígitos)
+        if (!/^\d{3}$/.test(cvv)) {
+            return res.status(400).json({
+                error: true,
+                mensaje: 'El CVV debe tener exactamente 3 dígitos'
+            });
+        }
+
+        const query = `
+            INSERT INTO tarjetas (id_usuarios, nombre_titular, numero_tarjeta, fecha_vencimiento, cvv)
+            VALUES (?, ?, ?, ?, ?)
+        `;
+
+        connection.query(
+            query,
+            [idUsuario, nombreTitular, numeroTarjeta, fechaVencimiento, cvv],
+            (error, results) => {
+                if (error) {
+                    console.error('Error al insertar tarjeta:', error);
+                    return res.status(500).json({
+                        error: true,
+                        mensaje: 'Error al registrar la tarjeta'
+                    });
+                }
+
+                res.status(201).json({
+                    error: false,
+                    mensaje: 'Tarjeta registrada exitosamente',
+                    idTarjeta: results.insertId
+                });
+            }
+        );
+    } catch (error) {
+        console.error('Error en el servidor:', error);
+        res.status(500).json({
+            error: true,
+            mensaje: 'Error interno del servidor'
+        });
+    }
+});
+
 module.exports = router;
