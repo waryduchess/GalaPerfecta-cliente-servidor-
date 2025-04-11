@@ -324,7 +324,7 @@ ALTER TABLE `paquete_servicio`
 --
 -- Filtros para la tabla `tarjetas`
 --
-ALTER TABLE `tarjetas`
+ALTER TABLE `tarjetas`  
   ADD CONSTRAINT `tarjetas_ibfk_1` FOREIGN KEY (`id_usuarios`) REFERENCES `usuarios` (`id_usuarios`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
