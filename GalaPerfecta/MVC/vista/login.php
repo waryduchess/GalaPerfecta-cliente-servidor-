@@ -1,3 +1,6 @@
+<?php
+session_start(); // Debe estar al inicio de cualquier página que use $_SESSION
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -45,6 +48,7 @@
                         <label>Contraseña</label>
                     </div>
                     <button type="submit" class="btn">Entrar</button>
+                    <button type="button" class="btn" onclick="location.href='index.php';">Regresar</button>
                     <p>¿No tienes una cuenta? <a href="#" id="show-register">Regístrate</a></p>
                 </form>
             </div>
